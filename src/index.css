@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Loading animation */
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-progress {
+  animation: progress 20s linear;
+}
+
+/* VS text animation */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.vs-text {
+  animation: pulse-scale 2s infinite;
+}
+
+/* Player entrance animations */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 1s ease-out forwards;
+} 
+
+.slide-in-right {
+  animation: slide-in-right 1s ease-out forwards;
+}
+
+.btn-slide {
+  @apply absolute px-[5%] py-[0.8%] font-bold text-[32px] border border-white bg-[#008ADB] text-white shadow-lg rounded-full uppercase ease-out duration-300 hover:bg-[#006AA8];
+}
+.btn-outline {
+  @apply px-6 py-1 rounded-full font-bold text-lg border border-[#008ADB] text-[#008ADB] shadow-lg ease-out duration-300 bg-white/80 hover:bg-[#008ADB] hover:text-white
+}
+
+.form-group {
+  @apply grid grid-cols-12 gap-4 items-center
+}
+.form-group label {
+  @apply col-span-3
+}
+
+.form-group input {
+  @apply col-span-9
+}
+
+input {
+  @apply px-4 py-1.5 text-base border border-black/20 outline-none rounded-full
+}
+
+.error {
+  color: red;
+}
+
+.btn {
+  @apply px-6 py-1.5 rounded-full text-center font-bold text-lg border border-white bg-[#008ADB] text-white shadow-lg rounded-full ease-out duration-300 hover:bg-[#006AA8];
+}
+
+span[class*="badge-rank-"] {
+  font-family: 'Arial Narrow Bold', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 4px 8px;
+  letter-spacing: -1px;
+}
+.badge-rank-12::before {
+  content: 'P12';
+}
+.badge-rank-11::before {
+  content: 'P11';
+}
+.badge-rank-10::before {
+  content: 'P10';
+}
+.badge-rank-9::before {
+  content: 'D9';
+}
+.badge-rank-8::before {
+  content: 'D8';
+}
+.badge-rank-7::before {
+  content: 'D7';
+}
+.badge-rank-6::before {
+  content: 'R6';
+}
+.badge-rank-5::before {
+  content: 'R5';
+}
+.badge-rank-4::before {
+  content: 'R4';
+}
+.badge-rank-3::before {
+  content: 'N3';
+}
+.badge-rank-2::before {
+  content: 'N2';
+}
+.badge-rank-1::before {
+  content: 'N1';
+}
+.badge-rank-10,.badge-rank-11,.badge-rank-12 {
+  background-color: #F5E952;
+  color: black;
+}
+.badge-rank-7,.badge-rank-8,.badge-rank-9 {
+  background-color: #92D149;
+  color: black;
+}
+.badge-rank-4,.badge-rank-5,.badge-rank-6 {
+  background-color: #5C8EDC;
+  color: white;
+}
+.badge-rank-1,.badge-rank-2,.badge-rank-3 {
+  background-color: #E43330;
+  color: white;
+}
