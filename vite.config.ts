@@ -7,16 +7,16 @@ import apiRoutes from "vite-plugin-api-routes";
 export default defineConfig({
   plugins: [
     react(),
-    apiRoutes({
-      // Configuration options go here
-      configure: "src/server/configure.ts",
-      dirs: [
-        {
-          dir: "src/server/api",
-          route: "",
-        },
-      ],
-    }),
+    // apiRoutes({
+    //   // Configuration options go here
+    //   configure: "src/server/configure.ts",
+    //   dirs: [
+    //     {
+    //       dir: "src/server/api",
+    //       route: "",
+    //     },
+    //   ],
+    // }),
   ],
   resolve: {
     alias: {
