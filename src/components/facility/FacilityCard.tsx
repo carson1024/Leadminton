@@ -4,6 +4,7 @@ import { Facility } from '../../types/game';
 import { useProgress } from '../../hooks/useProgress';
 import SpeedUpButton from '../common/SpeedUpButton';
 import { getInitialUpgradeCost } from '../../utils/facilityUtils';
+import { formatTime } from '@/utils/dateFormatter';
 
 interface FacilityCardProps {
   facility: Facility;
@@ -11,15 +12,6 @@ interface FacilityCardProps {
   onSpeedUp: (facilityId: string) => void;
   canAfford: boolean;
   canAffordSpeedUp: (diamondCost: number) => boolean;
-}
-
-function formatTime(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}m ${remainingSeconds}s`;
 }
 
 export default function FacilityCard({ 

@@ -7,7 +7,7 @@ import { calculateTrainingCost, calculateSpeedUpCost, calculateNewPlayerCost } f
 import { calculateTrainingTime } from '../utils/timeCalculator';
 import { generateRandomName } from '../utils/nameGenerator';
 import { generateInitialStats, generateInitialStatLevels } from '@/utils/initialState';
-import { recordTrainingStart, recordTrainingComplete, recordEquipmentChange, recordPlayerStrategyChange } from '../lib/gameActions';
+import { recordTrainingStart, recordTrainingComplete, recordEquipmentChange, recordPlayerStrategyChange, recordInjuriesChange } from '../lib/gameActions';
 import { Equipment } from '../types/equipment';
 import { useGame } from '@/contexts/GameContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,7 +65,7 @@ export default function ClubPage() {
       diamonds: -diamondCost
     });
 
-    const newStatValue = Math.min(100, player.stats[player.training.stat] + 5);
+    const newStatValue = player.stats[player.training.stat] + 5;
     await recordTrainingComplete(player, player.training.stat, newStatValue);
 
     dispatchGameState({ type: 'COMPLETE_TRAINING', payload: { playerId } });
@@ -75,9 +75,11 @@ export default function ClubPage() {
     const player = gameState.players.find(p => p.id === playerId);
     if (!player) return;
 
+    updateResources("training_cost", equipment.price, false);
+
     await recordEquipmentChange(player, equipment, 'equip');
 
-    dispatchGameState({ type: 'EQUIP_ITEM', payload: { playerId } });
+    dispatchGameState({ type: 'EQUIP_ITEM', payload: { playerId, equipment } });
   };
 
   const handleRecruitPlayer = async () => {
@@ -116,17 +118,16 @@ export default function ClubPage() {
         if (player.id === playerId && player.injuries) {
           const now = Date.now();
           // Appliquer la réduction à toutes les blessures actives
-          const updatedInjuries = player.injuries.map(injury => {
-            if (injury.recoveryEndTime > now) {
-              const remainingTime = injury.recoveryEndTime - now;
-              const reducedTime = remainingTime * (1 - recoveryReduction);
-              return {
-                ...injury,
-                recoveryEndTime: now + reducedTime
-              };
-            }
-            return injury;
+          const updatedInjuries = player.injuries.filter(injury => injury.recoveryEndTime > now).map(injury => {
+            const remainingTime = injury.recoveryEndTime - now;
+            const reducedTime = remainingTime * (1 - recoveryReduction);
+            return {
+              ...injury,
+              recoveryEndTime: now + reducedTime
+            };
           });
+
+          recordInjuriesChange(player, updatedInjuries);
 
           return {
             ...player,

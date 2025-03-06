@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pencil, Dumbbell, Brain, Shirt, Heart, Settings } from 'lucide-react';
 import { Player, PlayerStrategy } from '../../types/game';
 import { Equipment } from '../../types/equipment';
@@ -12,6 +12,7 @@ import PlayerStats from './PlayerStats';
 import HealingModal from './HealingModal';
 import { calculateTotalInjuryEffect } from '../../utils/injuryUtils';
 import PlayerStrategyModal from './PlayerStrategyModal';
+import { formatTime } from '@/utils/dateFormatter';
 
 interface PlayerCardProps {
   player: Player;
@@ -25,15 +26,6 @@ interface PlayerCardProps {
   onEquipItem: (playerId: string, equipment: Equipment) => void;
   onHeal?: (playerId: string, itemId: string, recoveryReduction: number) => void;
   onUpdateStrategy: (playerId: string, strategy: PlayerStrategy) => void;
-}
-
-function formatTime(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}m ${remainingSeconds}s`;
 }
 
 export default function PlayerCard({
@@ -63,14 +55,26 @@ export default function PlayerCard({
     }
   }, [player]);
   const { progress, timeLeft } = useProgress(player.training?.startTime, player.training?.period, handleSpeedUp);
-  
-  const playerScore = calculatePlayerScore(player);
-  const canTrain = player.level < player.maxLevel && !player.training;
-  const activeInjuries = player.injuries?.filter(injury => injury.recoveryEndTime > Date.now()) || [];
-  const isInjured = activeInjuries.length > 0;
+  const [time, setTime] = useState(Date.now()); // State to trigger updates
 
-  const genderEmoji = player.gender === 'male' ? '♂️' : '♀️';
-  const genderColor = player.gender === 'male' ? 'text-blue-500' : 'text-pink-500';
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(Date.now()); // Update time every second
+    }, 1000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+    
+  const playerScore = useMemo(() => calculatePlayerScore(player), [player]);
+  const canTrain = useMemo(() => player.level < player.maxLevel && !player.training, [player]);
+  const activeInjuries = useMemo(() => player.injuries?.filter(injury => injury.recoveryEndTime > time) || [], [player.injuries, time]);
+  const isInjured = useMemo(() => activeInjuries.length > 0, [activeInjuries]);
+
+  const genderDetails = useMemo(() => ({
+    emoji: player.gender === 'male' ? '♂️' : '♀️',
+    color: player.gender === 'male' ? 'text-blue-500' : 'text-pink-500'
+  }), [player.gender]);
+
 
   const handleNameSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +117,7 @@ export default function PlayerCard({
                 </form>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <span className={`text-lg ${genderColor}`}>{genderEmoji}</span>
+                  <span className={`text-lg ${genderDetails.color}`}>{genderDetails.emoji}</span>
                   <h3 className="text-lg font-semibold">{player.name}</h3>
                   <button
                     onClick={() => setIsEditingName(true)}
@@ -275,7 +279,7 @@ export default function PlayerCard({
               >
                 <div className="font-medium mb-1">{injury.type}</div>
                 <div className="text-sm space-y-1">
-                  <div>Recovery time: {formatTime(Math.max(0, Math.floor((injury.recoveryEndTime - Date.now()) / 1000)))}</div>
+                  <div>Recovery time: {formatTime(Math.max(0, Math.floor((injury.recoveryEndTime - time) / 1000)))}</div>
                   {injury.affectedStats && (
                     <div>Affected stats: {Object.keys(injury.affectedStats).join(', ')}</div>
                   )}

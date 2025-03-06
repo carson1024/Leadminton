@@ -1,9 +1,10 @@
 // Local game actions without database
 import { calculateTrainingTime, calculateUpgradeTime } from '@/utils/timeCalculator';
-import { Player, Facility, Equipment, PlayerStrategy, Resources } from '../types/game';
+import { Player, Facility, PlayerStrategy, Resources, Injury } from '../types/game';
 import { supabase } from './supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUpgradedFacility } from '@/utils/facilityUtils';
+import { Equipment } from '@/types/equipment';
 
 export async function recordResourceUpdate(userId: string | undefined, source: string, changes: Partial<Record<keyof Resources, number>>, isAdd: boolean = true) {
   if (!changes || !source || !userId) return;
@@ -145,12 +146,24 @@ export async function recordFacilityUpgradeComplete(facility: Facility, upgraded
   console.log('Facility upgrade completed:', facility.name);
 }
 
-export function recordEquipmentChange(
+export async function recordEquipmentChange(
   player: Player,
   equipment: Equipment,
   action: 'purchase' | 'equip' | 'unequip',
   costs?: { coins: number; diamonds: number }
 ) {
+  if (!player) return;
+  await supabase
+    .from('players')
+    .update([{
+      equipment: {
+        ...Object.fromEntries(
+          Object.entries((player.equipment || {})).map(([type, details]) => [type, details.id])
+        ),
+        [equipment.type]: equipment.id
+      },
+    }])
+    .eq('id', player.id);
   // Local implementation - no database needed
   console.log('Equipment change:', { 
     player: player.name, 
@@ -158,4 +171,20 @@ export function recordEquipmentChange(
     action,
     costs 
   });
+}
+
+export async function recordInjuriesChange(
+  player: Player,
+  injuries: Injury[]
+) {
+  if (!player) return;
+  const now = Date.now();
+  // Appliquer la réduction à toutes les blessures actives
+  const updatedInjuries = injuries.filter(injury => injury.recoveryEndTime > now);
+  await supabase
+    .from('players')
+    .update([{
+      injuries: updatedInjuries,
+    }])
+    .eq('id', player.id);
 }

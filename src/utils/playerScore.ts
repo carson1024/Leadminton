@@ -1,7 +1,7 @@
 import { Player } from '../types/game';
 import { calculateTotalInjuryEffect } from './injuryUtils';
 
-const STAT_WEIGHTS = {
+export const STAT_WEIGHTS = {
   // Physical stats
   endurance: 1.0,     // Base multiplier for endurance
   strength: 1.2,      // Slightly higher for strength
@@ -25,7 +25,7 @@ function calculateEquipmentBonuses(player: Player): Partial<Record<string, numbe
     Object.values(player.equipment).forEach((item) => {
       if (item && item.stats) {
         Object.entries(item.stats).forEach(([stat, bonus]) => {
-          bonuses[stat] = (bonuses[stat] || 0) + bonus;
+          bonuses[stat] = (bonuses[stat] || 0) + (bonus as number);
         });
       }
     });
@@ -60,10 +60,10 @@ export function calculatePlayerScore(player: Player) {
   const enhancedStats = { ...player.stats };
   Object.entries(equipmentBonuses).forEach(([stat, bonus]) => {
     if (stat in enhancedStats) {
-      enhancedStats[stat as keyof typeof enhancedStats] += bonus;
+      enhancedStats[stat as keyof typeof enhancedStats] += bonus || 0;
     }
   });
-  
+
   // Apply injury effects
   Object.entries(injuryEffects).forEach(([stat, value]) => {
     if (stat in enhancedStats) {
@@ -91,7 +91,7 @@ export function calculatePlayerScore(player: Player) {
   const avgStatLevel = statLevels.length > 0 
     ? statLevels.reduce((a, b) => a + b, 0) / statLevels.length 
     : 0;
-  
+
   const specialization = Object.entries(player.statLevels)
     .filter(([_, level]) => typeof level === 'number' && level > avgStatLevel * 1.3)
     .map(([stat]) => stat);

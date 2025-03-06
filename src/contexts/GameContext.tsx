@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
-import { GameState, Resources, Player, Equipment } from '../types/game';
+import { GameState, Resources, Player } from '../types/game';
 import { initialState } from '../utils/initialState';
 import { useResourceProduction } from '../hooks/useResourceProduction';
 import { rootReducer, GameAction } from '../reducers/rootReducer';
@@ -7,6 +7,7 @@ import { recordTrainingStart, recordTrainingComplete, recordEquipmentChange, rec
 import { calculateSpeedUpCost, calculateTrainingCost } from '../utils/costCalculator';
 import { useAuth } from './AuthContext';
 import { loadGameState, loadResources } from '@/utils/gameUtils';
+import { Equipment } from '@/types/equipment';
 
 interface GameContextType {
   gameState: GameState;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { X, Heart, Ban as Bandage, ChevronFirst as FirstAid } from 'lucide-react';
 import { Player, Resources } from '../../types/game';
 
@@ -43,8 +43,18 @@ const HEALING_ITEMS = [
 ];
 
 export default function HealingModal({ player, onClose, onHeal, resources }: HealingModalProps) {
-  const formatTime = (timestamp: number): string => {
-    const timeLeft = Math.max(0, timestamp - Date.now());
+  const [time, setTime] = useState(Date.now()); // State to trigger updates
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(Date.now()); // Update time every second
+    }, 1000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+  
+  const formatTime = useCallback((timestamp: number): string => {
+    const timeLeft = Math.max(0, timestamp - time);
     const minutes = Math.floor(timeLeft / (1000 * 60));
     const seconds = Math.floor((timeLeft / 1000) % 60);
     
@@ -53,14 +63,13 @@ export default function HealingModal({ player, onClose, onHeal, resources }: Hea
     }
     
     return `${minutes} minutes ${seconds} seconds`;
-  };
+  }, [time]);
 
   if (!player.injuries || player.injuries.length === 0) return null;
 
-  const activeInjuries = player.injuries.filter(injury => injury.recoveryEndTime > Date.now());
-  if (activeInjuries.length === 0) return null;
+  const activeInjuries = useMemo(() =>player.injuries.filter(injury => injury.recoveryEndTime > time), [player.injuries, time]);
 
-  return (
+  return (activeInjuries.length > 0 &&
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-6">

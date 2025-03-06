@@ -6,6 +6,7 @@ export interface Injury {
   id: string;
   type: string;
   severity: 'minor' | 'moderate' | 'severe';
+  recoveryTime: number;
   recoveryEndTime: number;
   affectedStats?: Partial<PlayerStats>;
   createdAt: number;

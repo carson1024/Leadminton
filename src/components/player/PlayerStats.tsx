@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Player, PlayerStats as PlayerStatsType } from '../../types/game';
+import React, { useMemo, useState } from 'react';
+import { Player, PlayerStats as PlayerStatsType, Resources } from '../../types/game';
 import { PHYSICAL_STATS, TECHNICAL_STATS } from '../../constants/stats';
 import StatBar from './StatBar';
 
@@ -16,6 +16,20 @@ function getStatColor(stat: string, isPhysical: boolean): string {
 export default function PlayerStats({ player, equipmentBonuses, injuryEffects }: PlayerStatsProps) {
   const [showPhysical, setShowPhysical] = useState(false);
   const [showTechnical, setShowTechnical] = useState(false);
+  const maxValue = useMemo<number>(() => {
+    let maxValue = 100;
+    PHYSICAL_STATS.map((statConfig) => {
+      const baseValue = player.stats[statConfig.stat];
+      const bonus = equipmentBonuses[statConfig.stat] || 0;
+      maxValue = Math.max(maxValue, baseValue + bonus);
+    });
+    TECHNICAL_STATS.map((statConfig) => {
+      const baseValue = player.stats[statConfig.stat];
+      const bonus = equipmentBonuses[statConfig.stat] || 0;
+      maxValue = Math.max(maxValue, baseValue + bonus);
+    });
+    return maxValue;
+  }, [player.stats, equipmentBonuses]);
 
   const getEffectiveStatValue = (stat: keyof PlayerStatsType) => {
     const baseValue = player.stats[stat];
@@ -51,13 +65,14 @@ export default function PlayerStats({ player, equipmentBonuses, injuryEffects }:
             const isAffected = statConfig.stat in injuryEffects;
             const baseValue = player.stats[statConfig.stat];
             const effectiveValue = getEffectiveStatValue(statConfig.stat);
-            
+
             return (
               <StatBar
                 key={statConfig.stat}
                 stat={statConfig.stat}
                 baseValue={baseValue}
                 effectiveValue={effectiveValue}
+                maxValue={maxValue}
                 bonus={equipmentBonuses[statConfig.stat] || 0}
                 Icon={statConfig.icon}
                 label={statConfig.label}
@@ -85,6 +100,7 @@ export default function PlayerStats({ player, equipmentBonuses, injuryEffects }:
                 baseValue={baseValue}
                 effectiveValue={effectiveValue}
                 bonus={equipmentBonuses[statConfig.stat] || 0}
+                maxValue={maxValue}
                 Icon={statConfig.icon}
                 label={statConfig.label}
                 color={getStatColor(statConfig.stat, false)}

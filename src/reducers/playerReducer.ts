@@ -1,5 +1,6 @@
 import { calculateTrainingTime } from '@/utils/timeCalculator';
-import { Player, Equipment, PlayerStrategy } from '../types/game';
+import { Player, PlayerStrategy } from '../types/game';
+import { Equipment } from '@/types/equipment';
 
 type PlayerAction =
   | { type: 'ADD_PLAYER'; payload: { player: Player } }
@@ -39,7 +40,7 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
               ...player,
               stats: {
                 ...player.stats,
-                [player.training.stat]: Math.min(100, player.stats[player.training.stat] + 5),
+                [player.training.stat]: player.stats[player.training.stat] + 5,
               },
               statLevels: {
                 ...player.statLevels,

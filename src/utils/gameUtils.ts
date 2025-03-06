@@ -2,6 +2,8 @@ import { supabase } from "@/lib/supabase";
 import { Facility, GameState, Manager, Player, Resources } from "@/types/game";
 import { generateInitialStatLevels, generateInitialStats, generateInitialStrategy, generateNewPlayer, initialFacilities, initialManagers, initialState } from "./initialState";
 import { generateRandomGender, generateRandomName } from "./nameGenerator";
+import { EQUIPMENT_DATA } from "@/data/equipment";
+import { Equipment } from "@/types/equipment";
 
 export const loadResources = async (userId: string): Promise<Resources> => {
   const resources: Resources = {
@@ -58,6 +60,15 @@ export const loadGameState = async (): Promise<GameState> => {
 
   let players: Player[] = [];
   (players_db || []).map((player_db: any) => {
+    let equipment_id_map: {
+      [key: string]: string
+    } = player_db.equipment;
+    let equiment: {
+      [key: string]: Equipment
+    } = {};
+    equipment_id_map && Object.entries(equipment_id_map).map(([type, id]) => {
+      equiment[type] = EQUIPMENT_DATA.find((equiment) => equiment.id == id) as Equipment;
+    });
     let player: Player = {
       id: player_db.id,
       gender: player_db.gender,
@@ -68,8 +79,8 @@ export const loadGameState = async (): Promise<GameState> => {
       maxLevel: player_db.max_level,
       rank: player_db.rank,
       training: player_db.training,
-      equipment: {},
-      injuries: [],
+      equipment: equiment,
+      injuries: (player_db.injuries || []),
       strategy: generateInitialStrategy()
     };
 

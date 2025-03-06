@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Swords } from 'lucide-react';
+import { formatTime } from '@/utils/dateFormatter';
 
 const LOADING_MESSAGES = [
   "Finding opponent...",
@@ -11,15 +12,6 @@ const LOADING_MESSAGES = [
   "Analyzing strategies...",
   "Getting ready...",
 ];
-
-function formatTime(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}m ${remainingSeconds}s`;
-}
 
 export default function MatchLoading() {
   const [messageIndex, setMessageIndex] = useState(0);

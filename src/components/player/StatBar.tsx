@@ -5,8 +5,9 @@ interface StatBarProps {
   stat: string;
   baseValue: number;
   effectiveValue: number;
+  maxValue: number;
   bonus: number;
-  Icon: LucideIcon;
+  Icon: typeof LucideIcon;
   label: string;
   color: string;
   level: number;
@@ -17,6 +18,7 @@ export default function StatBar({
   stat,
   baseValue,
   effectiveValue,
+  maxValue,
   bonus,
   Icon,
   label,
@@ -40,20 +42,20 @@ export default function StatBar({
           {/* Base stat bar */}
           <div
             className={`h-full ${color} transition-all duration-300`}
-            style={{ width: `${effectiveValue}%` }}
+            style={{ width: `${effectiveValue * 100 / maxValue}%` }}
           />
           {/* Equipment bonus bar */}
           {bonus > 0 && (
             <div
               className="h-full bg-green-500 absolute top-0 left-0 opacity-50"
-              style={{ width: `${totalValue}%` }}
+              style={{ width: `${totalValue * 100 / maxValue}%` }}
             />
           )}
           {/* Original value indicator if injured */}
           {isAffectedByInjury && (
             <div
               className="h-full border-r-2 border-red-400 absolute top-0"
-              style={{ left: `${baseValue}%` }}
+              style={{ left: `${baseValue * 100 / maxValue}%` }}
             />
           )}
         </div>

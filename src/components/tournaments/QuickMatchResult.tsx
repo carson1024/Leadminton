@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trophy, X, AlertTriangle } from 'lucide-react';
 import { Player, Resources } from '../../types/game';
+import { formatTime } from '@/utils/dateFormatter';
 
 interface QuickMatchResultProps {
   matchResult: {
@@ -20,7 +21,6 @@ interface QuickMatchResultProps {
   };
   rewards: {
     coins: number;
-    diamonds: number;
   };
   onClose: (rewards: Partial<Record<keyof Resources, number>>) => void;
 }
@@ -102,7 +102,7 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
                       <p>Player: {matchResult.players[0].name}</p>
                       <p>Injury: {newInjury.type}</p>
                       <p>Severity: {newInjury.severity}</p>
-                      <p>Recovery Time: {Math.ceil(newInjury.recoveryTime / 60)} minutes</p>
+                      <p>Recovery Time: {Math.max(0, newInjury.recoveryTime / 60000)} minutes</p>
                       {newInjury.affectedStats && Object.keys(newInjury.affectedStats).length > 0 && (
                         <p>Affected Stats: {Object.keys(newInjury.affectedStats).join(', ')}</p>
                       )}
@@ -118,9 +118,6 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
             <div className="space-y-1">
               {rewards.coins > 0 && (
                 <div className="text-yellow-600">+{rewards.coins} coins</div>
-              )}
-              {rewards.diamonds > 0 && (
-                <div className="text-purple-600">+{rewards.diamonds} diamonds</div>
               )}
             </div>
           </div>

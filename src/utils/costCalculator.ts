@@ -1,4 +1,5 @@
 import { Player } from '../types/game';
+import { STAT_WEIGHTS } from './playerScore';
 
 const BASE_TRAINING_COST = {
   physical: {
@@ -23,9 +24,9 @@ export function calculateTrainingCost(player: Player, stat: keyof Player['stats'
     : BASE_TRAINING_COST.technical;
 
   return {
-    shuttlecocks: Math.floor(baseCosts.shuttlecocks * Math.pow(1.5, statLevel)),
-    meals: Math.floor(baseCosts.meals * Math.pow(1.5, statLevel)),
-    coins: Math.floor(baseCosts.coins * Math.pow(1.5, statLevel)),
+    shuttlecocks: Math.round(baseCosts.shuttlecocks * Math.pow(1.5, statLevel) * STAT_WEIGHTS[stat]),
+    meals: Math.round(baseCosts.meals * Math.pow(1.5, statLevel) * STAT_WEIGHTS[stat]),
+    coins: Math.round(baseCosts.coins * Math.pow(1.5, statLevel) * STAT_WEIGHTS[stat]),
   };
 }
 
