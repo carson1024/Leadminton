@@ -2,7 +2,7 @@ import { Facility, Manager, Resources } from "@/types/game";
 import { calculateProductionRate } from "@/utils/facilityUtils";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(import.meta.env.VITE_SUPABASE_URL as string, import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string);
+const supabase = createClient(process.env.VITE_SUPABASE_URL as string, process.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string);
 
 exports.handler = async (event: any) => {
   try {
