@@ -1,5 +1,5 @@
-import { Facility, Manager, Resources } from "@/types/game";
-import { calculateProductionRate } from "@/utils/facilityUtils";
+import { Facility, Manager, Resources } from "../../src/types/game";
+import { calculateProductionRate } from "../../src/utils/facilityUtils";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL as string, process.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string);
