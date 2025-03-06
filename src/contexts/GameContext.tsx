@@ -32,13 +32,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [gameState, dispatch] = useReducer(rootReducer, initialState);
   const { resources, setResources, updateResources } = useResourceProduction(gameState.facilities, gameState.managers);
   const { isLogin, user } = useAuth();
+  
   const loadState = async () => {
     if (!user || !user.email) {
       dispatch({ type: 'SET_GAME_STATE', payload: {state: initialState} });
       return;
     }
-    const newResources = await loadResources(user.id);
-    newResources && setResources(newResources);
     const state = await loadGameState();
     dispatch({ type: 'SET_GAME_STATE', payload: {state: state} });
   };
