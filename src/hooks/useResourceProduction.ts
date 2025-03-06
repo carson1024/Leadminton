@@ -29,7 +29,8 @@ export function useResourceProduction(facilities: Facility[], managers: Manager[
   useEffect(() => {
     if (!user) return;
     const timer = setInterval(async () => {
-      setResources(await loadResources(user.id));
+      const newResources = await loadResources(user.id);
+      newResources && setResources(newResources);
       // const now = Date.now();
       // const timeDiff = now - lastProductionTime;
       // if (timeDiff >= 60000) { // Production every minute

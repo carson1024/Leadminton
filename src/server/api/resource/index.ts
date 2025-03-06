@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from "express";
 
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL as string, import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY as string);
 
-export const GET = async (req: Request, res: Response, next: NextFunction) => {
+export const POST = async (req: Request, res: Response, next: NextFunction) => {
   const { data: facilities_db } = await supabase.from("facilities").select("*");
   const { data: managers_db } = await supabase.from("managers").select("*");
   let users: string[] = [];

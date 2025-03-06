@@ -5,7 +5,7 @@ import { generateRandomGender, generateRandomName } from "./nameGenerator";
 import { EQUIPMENT_DATA } from "@/data/equipment";
 import { Equipment } from "@/types/equipment";
 
-export const loadResources = async (userId: string): Promise<Resources> => {
+export const loadResources = async (userId: string): Promise<Resources | null> => {
   const resources: Resources = {
     shuttlecocks: 10,
     meals: 10,
@@ -13,7 +13,9 @@ export const loadResources = async (userId: string): Promise<Resources> => {
     diamonds: 9999999,
   }
   console.log(userId);
-  const { data: user_balances } = await supabase.from("user_resource_balances").select("*").eq("user_id", userId);
+  const { data: user_balances, error } = await supabase.from("user_resource_balances").select("*").eq("user_id", userId);
+  if (error) return null;
+
   (user_balances || []).map((user_balance) => {
     resources[user_balance.resource_type as keyof Resources] += user_balance.balance;
   })

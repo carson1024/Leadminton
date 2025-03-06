@@ -37,7 +37,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_GAME_STATE', payload: {state: initialState} });
       return;
     }
-    setResources(await loadResources(user.id));
+    const newResources = await loadResources(user.id);
+    newResources && setResources(newResources);
     const state = await loadGameState();
     dispatch({ type: 'SET_GAME_STATE', payload: {state: state} });
   };
