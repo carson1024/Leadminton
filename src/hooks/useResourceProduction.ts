@@ -57,7 +57,7 @@ export function useResourceProduction(facilities: Facility[], managers: Manager[
 
       //   setLastProductionTime(now);
       // }
-    }, 30000);
+    }, 60000);
 
     return () => clearInterval(timer);
   }, [user]); // Ajout de managers dans les dépendances
