@@ -1,10 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo, useState } from 'react';
 import { GameState, Resources, Player } from '../types/game';
 import { initialState } from '../utils/initialState';
-import { useResourceProduction } from '../hooks/useResourceProduction';
 import { rootReducer, GameAction } from '../reducers/rootReducer';
-import { recordTrainingStart, recordTrainingComplete, recordEquipmentChange, recordResourceUpdate } from '../lib/gameActions';
-import { calculateSpeedUpCost, calculateTrainingCost } from '../utils/costCalculator';
+import { recordEquipmentChange, recordResourceUpdate } from '../lib/gameActions';
 import { useAuth } from './AuthContext';
 import { loadGameState, loadResources } from '@/utils/gameUtils';
 import { Equipment } from '@/types/equipment';
@@ -30,21 +28,50 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [gameState, dispatch] = useReducer(rootReducer, initialState);
-  const { resources, setResources, updateResources } = useResourceProduction(gameState.facilities, gameState.managers);
   const { isLogin, user } = useAuth();
+  const [resources, setResources] = useState<Resources>({
+    shuttlecocks: 10,
+    meals: 10,
+    coins: 200,
+    diamonds: 9999999,
+  });
+
+  const updateResources = useCallback(async (source: string, changes: Partial<Record<keyof Resources, number>>, isAdd: boolean = true) => {
+    await recordResourceUpdate(user?.id, source, changes, isAdd);
+    setResources(prev => {
+      let newResources: Resources = { ...prev };
+      Object.entries(changes).map(([resource, amount]) => {
+        newResources[resource as keyof Resources] += isAdd ? amount : -amount;
+      });
+      return newResources;
+    });
+  }, [resources, user]);
   
   const loadState = async () => {
     if (!user || !user.email) {
       dispatch({ type: 'SET_GAME_STATE', payload: {state: initialState} });
       return;
     }
+
     const state = await loadGameState();
     dispatch({ type: 'SET_GAME_STATE', payload: {state: state} });
+    
   };
 
   useEffect(() => {
-    if (!isLogin) return;
+    if (!user) return;
+    console.log("User Loaded");
+
+    const loadResource = async () => {
+      const newResources = await loadResources(user.id);
+      newResources && setResources(newResources);
+    };
+
+    const timer = setInterval(loadResource, 60000);
+    loadResource();
     loadState();
+
+    return () => clearInterval(timer);
   }, [isLogin]);
 
   const equipItem = async (playerId: string, equipment: Equipment) => {
