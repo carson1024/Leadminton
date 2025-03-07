@@ -17,7 +17,7 @@ export default function PlayerStats({ player, equipmentBonuses, injuryEffects }:
   const [showPhysical, setShowPhysical] = useState(false);
   const [showTechnical, setShowTechnical] = useState(false);
   const maxValue = useMemo<number>(() => {
-    let maxValue = 100;
+    let maxValue = 500;
     PHYSICAL_STATS.map((statConfig) => {
       const baseValue = player.stats[statConfig.stat];
       const bonus = equipmentBonuses[statConfig.stat] || 0;
