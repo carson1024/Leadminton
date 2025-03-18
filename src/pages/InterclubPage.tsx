@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
-import { Trophy, Users, Feather, UtensilsCrossed, Info, Swords, ArrowLeft, Medal, Coins } from 'lucide-react';
-import { Resources, Player } from '../types/game';
-import { useGame } from '../contexts/GameContext';
-import { calculatePlayerScore } from '../utils/playerScore';
+import React, { useState } from "react";
+import {
+  Trophy,
+  Users,
+  Feather,
+  UtensilsCrossed,
+  Info,
+  Swords,
+  ArrowLeft,
+  Medal,
+  Coins,
+} from "lucide-react";
+import { Resources, Player } from "../types/game";
+import { useGame } from "../contexts/GameContext";
+import { calculatePlayerScore } from "../utils/playerScore";
 
 export default function InterclubPage() {
   const { resources, gameState } = useGame();
   const [showIntro, setShowIntro] = useState(true);
 
-  // Page d'introduction des interclubs
+  // Page d'introduction des interclubs  Interclub introductory page
   if (showIntro) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -19,16 +29,23 @@ export default function InterclubPage() {
 
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-blue-600 mb-4">Nouvelle Saison d'Interclub</h2>
+            {/* New Interclub Season */}
+            <h2 className="text-2xl font-bold text-blue-600 mb-4">
+              Nouvelle Saison d'Interclub
+            </h2>
+            {/* You are about to launch a one-month interclub season. */}
             <p className="text-lg text-gray-600">
-              Vous êtes sur le point de lancer une saison d'interclub d'une durée de 1 mois
+              Vous êtes sur le point de lancer une saison d'interclub d'une
+              durée de 1 mois
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-8">
-            {/* Prérequis */}
+            {/* Prerequisites */}
             <div className="bg-blue-50 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4 text-blue-800">Prérequis</h3>
+              <h3 className="text-lg font-semibold mb-4 text-blue-800">
+                Prérequis
+              </h3>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 text-gray-700">
                   <Users className="w-5 h-5 text-blue-500" />
@@ -51,14 +68,18 @@ export default function InterclubPage() {
 
             {/* Ressources actuelles */}
             <div className="bg-gray-50 rounded-xl p-6">
+              {/* Your resources */}
               <h3 className="text-lg font-semibold mb-4">Vos ressources</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-gray-700">
                   <div className="flex items-center space-x-2">
                     <Users className="w-5 h-5 text-blue-500" />
+                    {/* Players */}
                     <span>Joueurs</span>
                   </div>
-                  <span className="font-medium">{gameState.players.length}/5</span>
+                  <span className="font-medium">
+                    {gameState.players.length}/5
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-gray-700">
                   <div className="flex items-center space-x-2">
@@ -72,7 +93,9 @@ export default function InterclubPage() {
                     <Feather className="w-5 h-5 text-blue-500" />
                     <span>Volants</span>
                   </div>
-                  <span className="font-medium">{resources.shuttlecocks}/100</span>
+                  <span className="font-medium">
+                    {resources.shuttlecocks}/100
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-gray-700">
                   <div className="flex items-center space-x-2">
@@ -85,30 +108,42 @@ export default function InterclubPage() {
             </div>
           </div>
 
-          {/* Sélection de la catégorie */}
+          {/* Sélection de la catégorie => Select your category*/}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4 text-center">Sélectionnez votre catégorie</h3>
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              Sélectionnez votre catégorie
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <button className="p-4 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
                 <div className="text-lg font-medium">Départemental</div>
                 <div className="text-sm opacity-75">Niveau débutant</div>
               </button>
-              <button disabled className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed">
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
                 <div className="text-lg font-medium">Régional</div>
                 <div className="text-sm">Niveau intermédiaire</div>
               </button>
-              <button disabled className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed">
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
                 <div className="text-lg font-medium">National</div>
                 <div className="text-sm">Niveau avancé</div>
               </button>
-              <button disabled className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed">
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
                 <div className="text-lg font-medium">TOP 12</div>
                 <div className="text-sm">Élite</div>
               </button>
             </div>
             <p className="text-sm text-gray-500 text-center mt-4">
               <Info className="w-4 h-4 inline-block mr-1" />
-              Les catégories supérieures seront débloquées après avoir remporté le niveau précédent
+              Les catégories supérieures seront débloquées après avoir remporté
+              le niveau précédent
             </p>
           </div>
 
@@ -147,16 +182,27 @@ export default function InterclubPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Liste des joueurs */}
         <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-            <Users className="w-5 h-5 text-blue-500" />
-            <span>Joueurs du Club</span>
+          <h2 className="text-lg font-semibold mb-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Users className="w-5 h-5 text-blue-500" />
+              <span>Joueurs du Club</span>
+            </div>
+            <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+              See All...
+            </button>
           </h2>
+
           <div className="space-y-3">
             {gameState.players.map((player) => (
-              <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={player.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
                   <div className="text-sm font-medium">{player.name}</div>
-                  <div className="text-xs text-gray-500">Niveau {player.level}</div>
+                  <div className="text-xs text-gray-500">
+                    Niveau {player.level}
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
@@ -207,21 +253,27 @@ export default function InterclubPage() {
               <Trophy className="w-6 h-6 text-yellow-500" />
               <div>
                 <div className="font-medium">1ère place</div>
-                <div className="text-sm text-gray-600">5000 pièces + 50 diamants</div>
+                <div className="text-sm text-gray-600">
+                  5000 pièces + 50 diamants
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4 p-3 bg-gray-100 rounded-lg">
               <Trophy className="w-6 h-6 text-gray-500" />
               <div>
                 <div className="font-medium">2ème place</div>
-                <div className="text-sm text-gray-600">3000 pièces + 30 diamants</div>
+                <div className="text-sm text-gray-600">
+                  3000 pièces + 30 diamants
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4 p-3 bg-orange-50 rounded-lg">
               <Trophy className="w-6 h-6 text-orange-500" />
               <div>
                 <div className="font-medium">3ème place</div>
-                <div className="text-sm text-gray-600">1500 pièces + 15 diamants</div>
+                <div className="text-sm text-gray-600">
+                  1500 pièces + 15 diamants
+                </div>
               </div>
             </div>
           </div>
@@ -229,27 +281,34 @@ export default function InterclubPage() {
 
         {/* Classement de la poule */}
         <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-            <Trophy className="w-5 h-5 text-blue-500" />
-            <span>Classement de la poule</span>
+          <h2 className="text-lg font-semibold mb-4 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <Trophy className="w-5 h-5 text-blue-500" />
+              <span>Classement de la poule</span>
+            </div>
+            <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+              See All...
+            </button>
           </h2>
+
           <div className="space-y-3">
             {[
-              { name: 'Team A', points: 590 },
-              { name: 'Vali Group', points: 424 },
-              { name: 'Group Boss', points: 300 },
-              { name: 'Tournan', points: 254 },
+              { name: "Team A", points: 590 },
+              { name: "Vali Group", points: 424 },
+              { name: "Group Boss", points: 300 },
+              { name: "Tournan", points: 254 },
             ].map((team, index) => (
-              <div key={team.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={team.name}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-6 h-6 flex items-center justify-center font-medium">
                     {index + 1}
                   </div>
                   <div className="font-medium">{team.name}</div>
                 </div>
-                <div className="text-sm font-medium">
-                  {team.points} points
-                </div>
+                <div className="text-sm font-medium">{team.points} points</div>
               </div>
             ))}
           </div>

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Tournament } from '../../types/tournament';
-import TournamentCard from './TournamentCard';
-import { Player } from '../../types/game';
+import React from "react";
+import { Tournament } from "../../types/tournament";
+import TournamentCard from "./TournamentCard";
+import { Player } from "../../types/game";
 
 interface TournamentListProps {
   tournaments: Tournament[];
@@ -10,13 +10,15 @@ interface TournamentListProps {
   onSelectTournament: (tournament: Tournament) => void;
 }
 
-export default function TournamentList({ 
-  tournaments, 
-  onRegister, 
+export default function TournamentList({
+  tournaments,
+  onRegister,
   availablePlayers,
-  onSelectTournament
+  onSelectTournament,
 }: TournamentListProps) {
-  const sortedTournaments = [...tournaments].sort((a, b) => a.startDate - b.startDate);
+  const sortedTournaments = [...tournaments].sort(
+    (a, b) => a.startDate - b.startDate
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

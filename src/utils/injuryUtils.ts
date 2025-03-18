@@ -58,7 +58,6 @@ export function checkForInjury(player: Player): Injury | null {
   
   // Force an injury for the test
   const roll = Math.random();
-  console.log('Injury check:', { risk: injuryRisk, roll });
   
   if (roll < injuryRisk) {
     const injuryType = INJURIES[Math.floor(Math.random() * INJURIES.length)];

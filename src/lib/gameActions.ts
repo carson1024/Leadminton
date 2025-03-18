@@ -181,6 +181,7 @@ export async function recordInjuriesChange(
   const now = Date.now();
   // Appliquer la réduction à toutes les blessures actives
   const updatedInjuries = injuries.filter(injury => injury.recoveryEndTime > now);
+  console.log(injuries);
   await supabase
     .from('players')
     .update([{

@@ -1,9 +1,9 @@
 import { supabase } from "@/lib/supabase";
 import { Facility, GameState, Manager, Player, Resources } from "@/types/game";
 import { generateInitialStatLevels, generateInitialStats, generateInitialStrategy, generateNewPlayer, initialFacilities, initialManagers, initialState } from "./initialState";
-import { generateRandomGender, generateRandomName } from "./nameGenerator";
 import { EQUIPMENT_DATA } from "@/data/equipment";
 import { Equipment } from "@/types/equipment";
+import { Tournament, TournamentRound, Match } from "@/types/tournament";
 
 export const loadResources = async (userId: string): Promise<Resources | null> => {
   const resources: Resources = {
@@ -12,7 +12,6 @@ export const loadResources = async (userId: string): Promise<Resources | null> =
     coins: 200,
     diamonds: 9999999,
   }
-  console.log(userId);
   const { data: user_balances, error } = await supabase.from("user_resource_balances").select("*").eq("user_id", userId);
   if (error) return null;
 
@@ -139,6 +138,35 @@ export const loadGameState = async (): Promise<GameState> => {
 
   state.players = players;
   return state;
+};
+
+export const loadTournaments = async () : Promise<Tournament[]> => {
+  console.log("loading tournaments ");
+  let tournaments: Tournament[] = [];
+  const { data: tournaments_db } = await supabase.from("tournament_list").select("*").order('start_date', { ascending: true });
+  // console.log("this is loaded tournaments from database ", tournaments_db);
+  (tournaments_db || [])?.map((tournament_db) => {
+    let rounds: TournamentRound[] = [];
+
+    let tiers = ['local' , 'regional' , 'national' , 'international' , 'premier'];
+    let tournament:Tournament = {
+      id : tournament_db.id,
+      startDate : /* tournament_db.start_date */ Date.now() + 15 * 1000,
+      endDate : /* tournament_db.end_date */ Date.now() + 60 * 1000,
+      prizePool : tournament_db.prizePool,
+      entryFee : tournament_db.entryFee,
+      minPlayerLevel : tournament_db.min_PlayerLevel,
+      maxParticipants : tournament_db.max_participants,
+      status : tournament_db.status==0 ? 'upcoming' : tournament_db.status==1 ? 'ongoing' : 'completed',
+      tier : tiers[tournament_db.tier],
+      currentParticipants : tournament_db.current_Participants,
+      isQuickTournament : false,
+      rounds: [{},{},{},{}],
+      registeredPlayers: [],
+    };
+    tournaments.push(tournament);
+  });
+  return tournaments;
 };
 
 export const updateName = async (playerId: string, newName: string): Promise<void> => {

@@ -1,14 +1,21 @@
-import React from 'react';
-import { X, Trophy, Users } from 'lucide-react';
-import { Tournament } from '../../types/tournament';
-import { formatDate } from '../../utils/dateFormatter';
+import React, { useEffect } from "react";
+import { X, Trophy, Users } from "lucide-react";
+import { Tournament } from "../../types/tournament";
+import { formatDate } from "../../utils/dateFormatter";
 
 interface TournamentParticipantsProps {
   tournament: Tournament;
   onClose: () => void;
 }
 
-export default function TournamentParticipants({ tournament, onClose }: TournamentParticipantsProps) {
+export default function TournamentParticipants({
+  tournament,
+  onClose,
+}: TournamentParticipantsProps) {
+  useEffect(() => {
+    console.log(tournament);
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
@@ -16,7 +23,8 @@ export default function TournamentParticipants({ tournament, onClose }: Tourname
           <div>
             <h3 className="text-xl font-bold">{tournament.name}</h3>
             <p className="text-sm text-gray-600">
-              {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}
+              {formatDate(tournament.startDate)} -{" "}
+              {formatDate(tournament.endDate)}
             </p>
           </div>
           <button
@@ -30,11 +38,15 @@ export default function TournamentParticipants({ tournament, onClose }: Tourname
         <div className="mb-4">
           <div className="flex items-center space-x-2 text-gray-600">
             <Users className="w-5 h-5" />
-            <span>{tournament.currentParticipants}/{tournament.maxParticipants} Participants</span>
+            <span>
+              {tournament.currentParticipants}/{tournament.maxParticipants}{" "}
+              Participants
+            </span>
           </div>
         </div>
 
-        {tournament.registeredPlayers && tournament.registeredPlayers.length > 0 ? (
+        {tournament.registeredPlayers &&
+        tournament.registeredPlayers.length > 0 ? (
           <div className="space-y-3">
             {tournament.registeredPlayers.map((player, index) => (
               <div

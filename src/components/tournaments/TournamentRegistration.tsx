@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { X } from 'lucide-react';
-import { Tournament } from '../../types/tournament';
-import { Player } from '../../types/game';
+import React, { useState } from "react";
+import { X } from "lucide-react";
+import { Tournament } from "../../types/tournament";
+import { Player } from "../../types/game";
 
 interface TournamentRegistrationProps {
   tournament: Tournament;
@@ -19,27 +19,31 @@ export default function TournamentRegistration({
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
 
   const eligiblePlayers = availablePlayers.filter(
-    player => player.level >= tournament.minPlayerLevel
+    (player) => player.level >= tournament.minPlayerLevel
   );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedPlayers.length === 0) return;
-    
+
     onRegister(selectedPlayers);
     onClose();
   };
 
   const togglePlayer = (playerId: string) => {
-    setSelectedPlayers(prev => {
+    // console.log("this is toggle Player");
+    setSelectedPlayers((prev) => {
       if (prev.includes(playerId)) {
-        return prev.filter(id => id !== playerId);
+        return prev.filter((id) => id !== playerId);
       }
-      
-      if (prev.length >= (tournament.maxParticipants - tournament.currentParticipants)) {
+
+      if (
+        prev.length >=
+        tournament.maxParticipants - tournament.currentParticipants
+      ) {
         return prev;
       }
-      
+
       return [...prev, playerId];
     });
   };
@@ -59,16 +63,19 @@ export default function TournamentRegistration({
 
         {eligiblePlayers.length === 0 ? (
           <p className="text-center text-gray-600">
-            No eligible players available. Players must be at least level {tournament.minPlayerLevel}.
+            No eligible players available. Players must be at least level{" "}
+            {tournament.minPlayerLevel}.
           </p>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="space-y-3 mb-4">
-              {eligiblePlayers.map(player => (
+              {eligiblePlayers.map((player) => (
                 <label
                   key={player.id}
                   className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 ${
-                    selectedPlayers.includes(player.id) ? 'border-blue-500 bg-blue-50' : ''
+                    selectedPlayers.includes(player.id)
+                      ? "border-blue-500 bg-blue-50"
+                      : ""
                   }`}
                 >
                   <input
@@ -79,7 +86,9 @@ export default function TournamentRegistration({
                   />
                   <div>
                     <div className="font-medium">{player.name}</div>
-                    <div className="text-sm text-gray-600">Level {player.level}</div>
+                    <div className="text-sm text-gray-600">
+                      Level {player.level}
+                    </div>
                   </div>
                 </label>
               ))}
@@ -98,8 +107,8 @@ export default function TournamentRegistration({
                 disabled={selectedPlayers.length === 0}
                 className={`px-4 py-2 rounded-lg ${
                   selectedPlayers.length > 0
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
                 }`}
               >
                 Register for Tournament

@@ -54,6 +54,7 @@ function createCpuOpponent(playerLevel: number): Player {
  * @returns 
  */
 export function simulateMatch(player1: Player, player2: Player) {
+  console.log(player1)
   const player1Strength = calculatePlayerStrength(player1);
   const player2Strength = calculatePlayerStrength(player2);
   
@@ -93,8 +94,9 @@ export function simulateMatch(player1: Player, player2: Player) {
   const score = points.join(', ');
   
   // Increase the chances of injury for the loser
-  const injury = checkForInjury(player1);
-  console.log('Match result:', { winner: winner.name, injury });
+  const injury1 = checkForInjury(player1);
+  const injury2 = checkForInjury(player2);
+  // console.log('Match result:', { winner: winner.name, injury });
 
   return {
     players: [player1, player2],
@@ -102,7 +104,8 @@ export function simulateMatch(player1: Player, player2: Player) {
     loser,
     score,
     summary: generateMatchSummary(winner, loser, score),
-    newInjury: injury
+    newInjury: injury1,
+    newInjury1: injury2
   };
 }
 

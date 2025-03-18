@@ -1,21 +1,47 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo, useState } from 'react';
-import { GameState, Resources, Player } from '../types/game';
-import { initialState } from '../utils/initialState';
-import { rootReducer, GameAction } from '../reducers/rootReducer';
-import { recordEquipmentChange, recordResourceUpdate } from '../lib/gameActions';
-import { useAuth } from './AuthContext';
-import { loadGameState, loadResources } from '@/utils/gameUtils';
-import { Equipment } from '@/types/equipment';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+import { GameState, Resources, Player } from "../types/game";
+import { initialState } from "../utils/initialState";
+import { rootReducer, GameAction } from "../reducers/rootReducer";
+import {
+  recordEquipmentChange,
+  recordResourceUpdate,
+} from "../lib/gameActions";
+import { useAuth } from "./AuthContext";
+import {
+  loadGameState,
+  loadResources,
+  loadTournaments,
+} from "@/utils/gameUtils";
+import { Equipment } from "@/types/equipment";
+import { Tournament } from "@/types/tournament";
 
 interface GameContextType {
   gameState: GameState;
   resources: Resources;
-  updateResources: (source: string, changes: Partial<Record<keyof Resources, number>>, isAdd?: boolean) => void;
+  tournaments: Tournament[];
+  setTournaments: (callback: (prev: Tournament[]) => Tournament[]) => void;
+  updateResources: (
+    source: string,
+    changes: Partial<Record<keyof Resources, number>>,
+    isAdd?: boolean
+  ) => void;
   setGameState: (callback: (prev: GameState) => GameState) => void;
   dispatchGameState: React.Dispatch<GameAction>;
   equipItem: (playerId: string, equipment: Equipment) => void;
   updatePlayerName: (playerId: string, name: string) => void;
-  healInjury: (playerId: string, injuryId: string, recoveryReduction: number) => void;
+  healInjury: (
+    playerId: string,
+    injuryId: string,
+    recoveryReduction: number
+  ) => void;
   handleQuickMatch: (playerId: string, updatedPlayer: Player) => void;
   purchaseResources: (
     resource: keyof Resources,
@@ -28,6 +54,7 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [gameState, dispatch] = useReducer(rootReducer, initialState);
+  const [tournaments, setTournaments] = useState([]);
   const { isLogin, user } = useAuth();
   const [resources, setResources] = useState<Resources>({
     shuttlecocks: 10,
@@ -36,26 +63,37 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     diamonds: 9999999,
   });
 
-  const updateResources = useCallback(async (source: string, changes: Partial<Record<keyof Resources, number>>, isAdd: boolean = true) => {
-    await recordResourceUpdate(user?.id, source, changes, isAdd);
-    setResources(prev => {
-      let newResources: Resources = { ...prev };
-      Object.entries(changes).map(([resource, amount]) => {
-        newResources[resource as keyof Resources] += isAdd ? amount : -amount;
+  const updateResources = useCallback(
+    async (
+      source: string,
+      changes: Partial<Record<keyof Resources, number>>,
+      isAdd: boolean = true
+    ) => {
+      await recordResourceUpdate(user?.id, source, changes, isAdd);
+      setResources((prev) => {
+        let newResources: Resources = { ...prev };
+        Object.entries(changes).map(([resource, amount]) => {
+          newResources[resource as keyof Resources] += isAdd ? amount : -amount;
+        });
+        return newResources;
       });
-      return newResources;
-    });
-  }, [resources, user]);
-  
+    },
+    [resources, user]
+  );
+
   const loadState = async () => {
     if (!user || !user.email) {
-      dispatch({ type: 'SET_GAME_STATE', payload: {state: initialState} });
+      dispatch({ type: "SET_GAME_STATE", payload: { state: initialState } });
       return;
     }
 
+    // console.log("---    ---    ----    -----", initialState);
     const state = await loadGameState();
-    dispatch({ type: 'SET_GAME_STATE', payload: {state: state} });
-    
+    dispatch({ type: "SET_GAME_STATE", payload: { state: state } });
+  };
+
+  const loadTournament = async () => {
+    setTournaments(await loadTournaments());
   };
 
   useEffect(() => {
@@ -70,34 +108,40 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const timer = setInterval(loadResource, 60000);
     loadResource();
     loadState();
+    loadTournament();
+    // setTournaments(await loadTournaments());
 
     return () => clearInterval(timer);
   }, [isLogin]);
 
   const equipItem = async (playerId: string, equipment: Equipment) => {
-    const player = gameState.players.find(p => p.id === playerId);
+    const player = gameState.players.find((p) => p.id === playerId);
     if (!player) return;
 
     try {
-      await recordEquipmentChange(player, equipment, 'equip');
-      dispatch({ type: 'EQUIP_ITEM', payload: { playerId, equipment } });
+      await recordEquipmentChange(player, equipment, "equip");
+      dispatch({ type: "EQUIP_ITEM", payload: { playerId, equipment } });
     } catch (error) {
-      console.error('Failed to equip item:', error);
+      console.error("Failed to equip item:", error);
     }
   };
 
   const updatePlayerName = (playerId: string, name: string) => {
-    dispatch({ type: 'UPDATE_PLAYER_NAME', payload: { playerId, name } });
+    dispatch({ type: "UPDATE_PLAYER_NAME", payload: { playerId, name } });
   };
 
-  const healInjury = (playerId: string, injuryId: string, recoveryReduction: number) => {
-    dispatch({ type: 'HEAL_INJURY', payload: { playerId, injuryId } });
+  const healInjury = (
+    playerId: string,
+    injuryId: string,
+    recoveryReduction: number
+  ) => {
+    dispatch({ type: "HEAL_INJURY", payload: { playerId, injuryId } });
   };
 
   const handleQuickMatch = (playerId: string, updatedPlayer: Player) => {
     // setGameState(prev => ({
     //   ...prev,
-    //   players: prev.players.map(p => 
+    //   players: prev.players.map(p =>
     //     p.id === playerId ? updatedPlayer : p
     //   )
     // }));
@@ -112,17 +156,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     updateResources("shop_purchase", {
       [resource]: amount,
-      diamonds: -cost
-    })
+      diamonds: -cost,
+    });
   };
 
   const setGameState = (callback: (prev: GameState) => GameState) => {
-    dispatch({type: 'SET_GAME_STATE', payload: {state: callback(gameState)}});
-  }
+    dispatch({
+      type: "SET_GAME_STATE",
+      payload: { state: callback(gameState) },
+    });
+  };
 
   const value = {
     gameState,
     resources,
+    tournaments,
+    setTournaments,
     updateResources,
     setGameState,
     dispatchGameState: dispatch,
@@ -130,7 +179,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     updatePlayerName,
     healInjury,
     handleQuickMatch,
-    purchaseResources
+    purchaseResources,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;
@@ -139,7 +188,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 export function useGame() {
   const context = useContext(GameContext);
   if (context === undefined) {
-    throw new Error('useGame must be used within a GameProvider');
+    throw new Error("useGame must be used within a GameProvider");
   }
   return context;
 }

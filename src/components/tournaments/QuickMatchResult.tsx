@@ -1,7 +1,7 @@
-import React from 'react';
-import { Trophy, X, AlertTriangle } from 'lucide-react';
-import { Player, Resources } from '../../types/game';
-import { formatTime } from '@/utils/dateFormatter';
+import React from "react";
+import { Trophy, X, AlertTriangle } from "lucide-react";
+import { Player, Resources } from "../../types/game";
+import { formatTime } from "@/utils/dateFormatter";
 
 interface QuickMatchResultProps {
   matchResult: {
@@ -13,7 +13,7 @@ interface QuickMatchResultProps {
     newInjury?: {
       player: Player;
       type: string;
-      severity: 'minor' | 'moderate' | 'severe';
+      severity: "minor" | "moderate" | "severe";
       recoveryTime: number;
       recoveryEndTime: number;
       affectedStats?: Partial<Record<string, number>>;
@@ -25,9 +25,13 @@ interface QuickMatchResultProps {
   onClose: (rewards: Partial<Record<keyof Resources, number>>) => void;
 }
 
-export default function QuickMatchResult({ matchResult, rewards, onClose }: QuickMatchResultProps) {
+export default function QuickMatchResult({
+  matchResult,
+  rewards,
+  onClose,
+}: QuickMatchResultProps) {
   if (!matchResult || !matchResult.winner || !matchResult.loser) {
-    console.error('Invalid match result:', matchResult);
+    console.error("Invalid match result:", matchResult);
     return null;
   }
 
@@ -35,14 +39,14 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'minor':
-        return 'text-yellow-600 bg-yellow-50';
-      case 'moderate':
-        return 'text-orange-600 bg-orange-50';
-      case 'severe':
-        return 'text-red-600 bg-red-50';
+      case "minor":
+        return "text-yellow-600 bg-yellow-50";
+      case "moderate":
+        return "text-orange-600 bg-orange-50";
+      case "severe":
+        return "text-red-600 bg-red-50";
       default:
-        return 'text-gray-600 bg-gray-50';
+        return "text-gray-600 bg-gray-50";
     }
   };
 
@@ -50,7 +54,7 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
     try {
       onClose(rewards);
     } catch (error) {
-      console.error('Error closing match result:', error);
+      console.error("Error closing match result:", error);
     }
   };
 
@@ -69,9 +73,13 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
 
         <div className="space-y-6">
           <div className="text-center">
-            <Trophy className={`w-12 h-12 mx-auto mb-3 ${
-              winner.id.startsWith('cpu') ? 'text-gray-400' : 'text-yellow-500'
-            }`} />
+            <Trophy
+              className={`w-12 h-12 mx-auto mb-3 ${
+                winner.id.startsWith("cpu")
+                  ? "text-gray-400"
+                  : "text-yellow-500"
+              }`}
+            />
             <h4 className="text-lg font-semibold mb-1">
               {winner.name} defeats {loser.name}
             </h4>
@@ -92,8 +100,10 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
           {newInjury && (
             <div className="space-y-3">
               <h5 className="font-medium">Injury Report:</h5>
-              <div 
-                className={`rounded-lg p-4 ${getSeverityColor(newInjury.severity)}`}
+              <div
+                className={`rounded-lg p-4 ${getSeverityColor(
+                  newInjury.severity
+                )}`}
               >
                 <div className="flex items-start space-x-3">
                   <AlertTriangle className="w-5 h-5 mt-0.5" />
@@ -102,10 +112,17 @@ export default function QuickMatchResult({ matchResult, rewards, onClose }: Quic
                       <p>Player: {matchResult.players[0].name}</p>
                       <p>Injury: {newInjury.type}</p>
                       <p>Severity: {newInjury.severity}</p>
-                      <p>Recovery Time: {Math.max(0, newInjury.recoveryTime / 60000)} minutes</p>
-                      {newInjury.affectedStats && Object.keys(newInjury.affectedStats).length > 0 && (
-                        <p>Affected Stats: {Object.keys(newInjury.affectedStats).join(', ')}</p>
-                      )}
+                      <p>
+                        Recovery Time:{" "}
+                        {Math.max(0, newInjury.recoveryTime / 60000)} minutes
+                      </p>
+                      {newInjury.affectedStats &&
+                        Object.keys(newInjury.affectedStats).length > 0 && (
+                          <p>
+                            Affected Stats:{" "}
+                            {Object.keys(newInjury.affectedStats).join(", ")}
+                          </p>
+                        )}
                     </div>
                   </div>
                 </div>
