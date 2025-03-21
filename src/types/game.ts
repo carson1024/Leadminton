@@ -12,6 +12,15 @@ export interface Injury {
   createdAt: number;
 }
 
+<<<<<<< HEAD
+export interface PlayHistory {
+  result: boolean;
+  level1: number;
+  level2: number;
+}
+
+=======
+>>>>>>> a3ea31750ecc8a976cbd0e7d918482a143f70c3d
 export interface PlayerStrategy {
   physicalCommitment: number;  // Implication physique
   playStyle: number;           // Style de frappe

@@ -12,7 +12,6 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
     y: 0,
     content: "",
   });
-
   const barRef = useRef<HTMLDivElement>(null);
   const progressWidth = Math.floor((rank * 100) / 450); // Active area width
 
@@ -26,9 +25,9 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
     6: "R6",
     7: "R5",
     8: "R4",
-    9: "R3",
-    10: "R2",
-    11: "R1",
+    9: "N3",
+    10: "N2",
+    11: "N1",
   };
 
   const totalRanks = 12;

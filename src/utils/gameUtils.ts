@@ -18,7 +18,6 @@ export const loadResources = async (userId: string): Promise<Resources | null> =
   (user_balances || []).map((user_balance) => {
     resources[user_balance.resource_type as keyof Resources] += user_balance.balance;
   })
-  
   return resources;
 }
 
@@ -33,8 +32,8 @@ export const loadGameState = async (): Promise<GameState> => {
   const { data: player_stats } = await supabase.from("player_stats").select("*");
   const { data: player_levels } = await supabase.from("player_levels").select("*");
   const { data: player_strategies } = await supabase.from("player_strategy").select("*");
-  const { data: facilities_db } = await supabase.from("facilities").select("*").order('created_at', {ascending: true});
-  const { data: managers_db } = await supabase.from("managers").select("*").order('created_at', {ascending: true});
+  const { data: facilities_db } = await supabase.from("facilities").select("*").order('created_at', { ascending: true });
+  const { data: managers_db } = await supabase.from("managers").select("*").order('created_at', { ascending: true });
 
   state.facilities = (facilities_db || []).map((facility_db: any): Facility => ({
     id: facility_db.id,
@@ -140,32 +139,68 @@ export const loadGameState = async (): Promise<GameState> => {
   return state;
 };
 
-export const loadTournaments = async () : Promise<Tournament[]> => {
+export const loadTournaments = async (players: Player[]): Promise<Tournament[]> => {
   console.log("loading tournaments ");
   let tournaments: Tournament[] = [];
-  const { data: tournaments_db } = await supabase.from("tournament_list").select("*").order('start_date', { ascending: true });
+  // const { data: tournaments_db } = await supabase.from("tournament_list").select("*").order('start_date', { ascending: true });
+  const { data: tournaments_db } = await supabase.rpc("get_tournaments_with_rounds_matches");
+  console.log("this is getting tournament function from db", tournaments_db);
   // console.log("this is loaded tournaments from database ", tournaments_db);
-  (tournaments_db || [])?.map((tournament_db) => {
-    let rounds: TournamentRound[] = [];
 
-    let tiers = ['local' , 'regional' , 'national' , 'international' , 'premier'];
-    let tournament:Tournament = {
-      id : tournament_db.id,
-      startDate : /* tournament_db.start_date */ Date.now() + 15 * 1000,
-      endDate : /* tournament_db.end_date */ Date.now() + 60 * 1000,
-      prizePool : tournament_db.prizePool,
-      entryFee : tournament_db.entryFee,
-      minPlayerLevel : tournament_db.min_PlayerLevel,
-      maxParticipants : tournament_db.max_participants,
-      status : tournament_db.status==0 ? 'upcoming' : tournament_db.status==1 ? 'ongoing' : 'completed',
-      tier : tiers[tournament_db.tier],
-      currentParticipants : tournament_db.current_Participants,
-      isQuickTournament : false,
-      rounds: [{},{},{},{}],
-      registeredPlayers: [],
+  const normalizeRound = (rounds, tier) => {
+    let totalLength = rounds?.length;
+    let matchtemplate: Match = {
+      id: "0",
+      players: [null, null],
+      completed: false
+    }
+    return rounds?.map((round, index) => {
+      // round?.matches.length
+      if (round?.matches?.length < Math.pow(2, (totalLength - index - 1))) {
+        let result: Match[] = [];
+        for (let p = 0; p < Math.pow(2, (totalLength - index - 1)); p++) {
+          let newMatch = { ...matchtemplate };
+          newMatch.id = "" + (p + 1);
+          result.push(newMatch);
+        }
+        round?.matches?.map((match, index) => {
+          // console.log(match?.players);
+          result[parseInt(match.id) - 1] = {
+            ...match, players: match?.players?.map((player, idx) => {
+              if (player) {
+                return players.find(p => p.id == player);
+              }
+              else return null;
+            })
+          };
+        });
+        return { ...round, matches: result };
+      }
+    });
+    // return "";/
+  }
+
+  (tournaments_db || [])?.map(async (tournament_db, index) => {
+
+    let tiers = ['local', 'regional', 'national', 'international', 'premier'];
+    let tournament: Tournament = {
+      id: tournament_db.id,
+      startDate: /* tournament_db.start_date */ Date.now() + 15 * 1000,
+      endDate: /* tournament_db.end_date */ Date.now() + 60000 * 1000,
+      prizePool: tournament_db.prizePool,
+      entryFee: tournament_db.entryFee,
+      minPlayerLevel: tournament_db.min_PlayerLevel,
+      maxParticipants: tournament_db.max_participants,
+      status: tournament_db.status == 0 ? 'upcoming' : tournament_db.status == 1 ? 'ongoing' : 'completed',
+      tier: tiers[tournament_db.tier],
+      currentParticipants: tournament_db.current_Participants,
+      isQuickTournament: false,
+      rounds: normalizeRound(tournament_db.rounds, tiers[tournament_db.tier]) /* tournament_db.rounds */ /* [{},{},{},{}] */,
+      registeredPlayers: tournament_db.registeredPlayers,
     };
     tournaments.push(tournament);
   });
+  console.log("this is calculated", tournaments)
   return tournaments;
 };
 
@@ -194,7 +229,6 @@ export const createPlayer = async (userId: string): Promise<Player | null> => {
     })
     .select('id, name')
     .single();
-  
   if (error) {
     console.error({ error });
     return null;
@@ -225,6 +259,5 @@ export const createPlayer = async (userId: string): Promise<Player | null> => {
   });
 
   newPlayer.id = data.id;
-  
   return newPlayer;
 }

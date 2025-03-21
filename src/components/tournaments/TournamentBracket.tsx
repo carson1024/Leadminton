@@ -1,33 +1,49 @@
 import React, { useState, useEffect } from "react";
 import { Trophy, Timer } from "lucide-react";
 import { Match, TournamentRound } from "../../types/tournament";
-
+import { RegisteredPlayer } from "../../types/tournament";
+import { createCpuPlayer } from "@/data/tournaments";
 interface TournamentBracketProps {
   rounds: TournamentRound[];
   currentPlayerId: string;
+  registeredPLayers: RegisteredPlayer[];
   startTime: number;
   onMatchSelect: (matchIndex: number) => void;
+  fillWithCPU: () => void;
   onStartMatch: (playderId: string) => void;
+  finishTournament: () => void;
 }
 export default function TournamentBracket({
   rounds,
   currentPlayerId,
+  registeredPLayers,
   startTime,
   onMatchSelect,
+  fillWithCPU,
   onStartMatch,
+  finishTournament,
 }: TournamentBracketProps) {
   const [timeLeft, setTimeLeft] = useState(
     Math.max(0, Math.floor((startTime - Date.now()) / 1000))
   );
-
+  // console.log("this is round bracket", rounds);
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   useEffect(() => {
+    // console.log("changing the rounds ", rounds);
+  }, [rounds]);
+
+  useEffect(() => {
     if (timeLeft <= 0) {
-      const currentRound = rounds.find((round) =>
+      let currentRound = rounds.find((round) =>
         round.matches.some((match) => match.completed === false)
       );
+      // console.log("timer reached to zero, ", currentRound);
       if (!currentRound) return;
+      if (currentRound.level == 0) {
+        currentRound = fillWithCPU();
+        // setTimeLeft(timeLeft - 1);
+      }
       // Function to process matches
       const processMatches = async () => {
         if (currentRound?.matches) {
@@ -36,6 +52,14 @@ export default function TournamentBracket({
             onStartMatch(match.players[0]?.id);
             await delay(400); // Wait for 100 milliseconds
             onStartMatch(currentPlayerId);
+          }
+          if (currentRound?.matches?.length == 1) {
+            finishTournament(
+              currentRound?.matches?.[currentRound?.matches?.length - 1]
+                .players[0],
+              currentRound?.matches?.[currentRound?.matches?.length - 1]
+                .players[1]
+            );
           }
         }
       };
@@ -48,7 +72,7 @@ export default function TournamentBracket({
         ) !=
         rounds.length - 1
       )
-        setTimeLeft(5);
+        setTimeLeft(15);
       else {
       }
       // setTimeLeft(10);
@@ -76,11 +100,42 @@ export default function TournamentBracket({
     index: Number,
     prev: Boolean
   ) => {
-    if (round.matches[0].completed) return "(complted)";
+    // console.log(round);
+    if (round?.matches[0]?.completed) return "(complted)";
     else if (!prev) return "(upcoming)";
     else {
-      return `(${new Date(timeLeft * 1000).toISOString().substr(11, 8)} left)`;
+      return `(${formatTimeLeft(timeLeft * 1000)} left)`;
     }
+  };
+
+  const formatTimeLeft = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000) % 60;
+    const minutes = Math.floor(ms / (1000 * 60)) % 60;
+    const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+    const parts: string[] = [];
+
+    if (days > 0) {
+      parts.push(`${days}d`);
+      if (hours > 0) parts.push(`${hours}h`); // Include hours if days are present
+    } else if (hours > 0) {
+      parts.push(`${hours}h`); // Include hours if no days
+    }
+
+    if (minutes > 0) {
+      parts.push(`${minutes}m`);
+    } else if (parts.length > 0) {
+      parts.push(`0m`); // Show 0m if there are higher units
+    }
+
+    if (seconds > 0) {
+      parts.push(`${seconds}s`);
+    } else if (parts.length > 0) {
+      parts.push(`0s`); // Show 0s if there are higher units
+    }
+
+    return parts.join(" ");
   };
 
   return (
@@ -94,8 +149,7 @@ export default function TournamentBracket({
           <div className="flex items-center space-x-2 px-6 py-3 bg-blue-100 rounded-full">
             <Timer className="w-5 h-5 text-blue-600 animate-pulse" />
             <span className="text-blue-600 font-medium">
-              Tournament starts in:{" "}
-              {new Date(timeLeft * 1000).toISOString().substr(11, 8)}
+              Tournament starts in: {formatTimeLeft(timeLeft * 1000)}
             </span>
           </div>
         )}
@@ -108,7 +162,7 @@ export default function TournamentBracket({
               getRoundPrefix(
                 round,
                 i,
-                i - 1 >= 0 ? rounds[i - 1].matches[0].completed : true
+                i - 1 >= 0 ? rounds[i - 1].matches[0]?.completed : true
               )}
           </div>
         ))}
@@ -169,7 +223,9 @@ export default function TournamentBracket({
                       key={playerIndex}
                       className={`h-12 px-4 flex items-center border-l-4 bg-white shadow-sm mb-1 
                         ${
-                          player?.id == currentPlayerId
+                          /* player?.id == currentPlayerId */ registeredPLayers.some(
+                            (pl) => pl?.playerId == player?.id
+                          )
                             ? "border-l-blue-500"
                             : "border-l-gray-200"
                         }

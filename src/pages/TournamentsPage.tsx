@@ -3,13 +3,16 @@ import { Trophy, Filter, CodeSquare, CopyMinus } from "lucide-react";
 import TournamentList from "../components/tournaments/TournamentList";
 import TournamentBracket from "../components/tournaments/TournamentBracket";
 import QuickMatchResult from "../components/tournaments/QuickMatchResult";
-import { MOCK_TOURNAMENTS } from "../data/tournaments";
+import { createCpuPlayer, MOCK_TOURNAMENTS } from "../data/tournaments";
 import { TournamentTier, Tournament } from "../types/tournament";
-import { Resources, Player } from "../types/game";
+import { Resources, Player, PlayHistory } from "../types/game";
 import { simulateMatch } from "../utils/tournamentSimulator";
 import { useGame } from "@/contexts/GameContext";
-import { recordInjuriesChange } from "@/lib/gameActions";
-
+import {
+  recordInjuriesChange,
+  recordMatch,
+  updatePlayerRank,
+} from "@/lib/gameActions";
 interface TournamentsPageProps {
   players: Player[];
   resources: Resources;
@@ -19,8 +22,8 @@ interface TournamentsPageProps {
 export default function TournamentsPage() {
   const {
     gameState,
-    // tournaments,
-    // setTournaments,
+    tournaments,
+    setTournaments,
     updateResources,
     dispatchGameState,
   } = useGame();
@@ -28,12 +31,13 @@ export default function TournamentsPage() {
   const [selectedTier, setSelectedTier] = useState<TournamentTier | "all">(
     "all"
   );
+  // const [registeredPlayers, setRegisteredPlayers] = useState<string[]>();
   const [currentPlayer, setCurrentPlayer] = useState<string>();
   const [selectedTournament, setSelectedTournament] =
     useState<Tournament | null>(null);
-  const [tournaments, setTournaments] = useState<Tournament[]>(
+  /* const [tournaments, setTournaments] = useState<Tournament[]>(
     MOCK_TOURNAMENTS.filter((t) => !t.isQuickTournament)
-  );
+  ); */
   const [matchResult, setMatchResult] = useState<any>(null);
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number | null>(
     null
@@ -51,6 +55,7 @@ export default function TournamentsPage() {
   useEffect(() => {}, [tournaments]);
 
   useEffect(() => {
+    // console.log(currentMatchIndex);
     if (!selectedTournament || currentMatchIndex === null) return;
 
     const tournament = tournaments.find((t) => t.id === selectedTournament.id);
@@ -62,7 +67,7 @@ export default function TournamentsPage() {
 
     // looking for current round -> match
     for (let i = 0; i < tournament.rounds.length; i++) {
-      const roundMatch = tournament.rounds[i].matches.find(
+      const roundMatch = tournament.rounds[i].matches?.find(
         (m) => !m.completed && m.players.some((p) => p?.id === currentPlayer)
       );
       if (roundMatch) {
@@ -76,14 +81,36 @@ export default function TournamentsPage() {
     if (!matchFound || !match) return;
     const opponent = match.players.find((p) => p?.id !== currentPlayer);
     const player = match.players.find((p) => p?.id === currentPlayer);
-    if (!opponent) return;
+    if (currentMatchIndex == 10) console.log("ten for --- ", player, opponent);
+    if (!opponent || !player) return;
 
+    // console.log(player, opponent);
     const result = simulateMatch(player, opponent);
     if (
       gameState.players.some((pl, index) => pl.id == player?.id) ||
       gameState.players.some((pl, index) => pl.id == opponent.id)
-    )
-      setMatchResult(result);
+    ) {
+      console.log("before saving");
+      const recordAndUpdate = async () => {
+        await recordMatch(player, opponent, {
+          result: result.winner.id == player.id,
+          level1: player.rank,
+          level2: opponent.rank,
+        });
+        setMatchResult(result);
+        let newRank = await updatePlayerRank(
+          gameState.players.some((p1, ind) => p1.id == player?.id)
+            ? player.id
+            : opponent.id
+        );
+        console.log("this is new rank ", newRank);
+        dispatchGameState({
+          type: "UPDATE_RANK",
+          payload: { playerId: player.id, rank: newRank },
+        });
+      };
+      recordAndUpdate();
+    }
 
     // apply injury player
     if (result.newInjury && !player?.id.includes("cpu")) {
@@ -116,6 +143,24 @@ export default function TournamentsPage() {
     }
     if (gameState.players.some((pl, index) => pl.id == result.loser.id)) {
       let reward: Partial<Record<keyof Resources, number>> = { coins: 200 };
+      updateResources("tournament_reward", reward);
+    }
+
+    // win last currentRound
+    console.log("currentRound.name", currentRound);
+    if (currentRound == selectedTournament.rounds?.length - 1) {
+      /* shuttlecocks: number;
+      meals: number;
+      coins: number;
+      diamonds: number; */
+      // selectedTournament.prizePool.first.diamonds
+      let reward: Partial<Record<keyof Resources, number>> = {
+        diamonds: selectedTournament.prizePool.first.diamonds || 0,
+        coins: selectedTournament.prizePool.first.coins || 0,
+        meals: selectedTournament.prizePool.first.meals || 0,
+        shuttlecocks: selectedTournament.prizePool.first.shuttlecocks || 0,
+      };
+      console.log("reward ", reward);
       updateResources("tournament_reward", reward);
     }
 
@@ -182,44 +227,155 @@ export default function TournamentsPage() {
     } */
   };
 
-  useEffect(() => {}, [currentMatchIndex]);
+  const fillWithCpu = () => {
+    if (!selectedTournament) return;
+    const tournament = tournaments.find((t) => t.id === selectedTournament.id);
+    if (!tournament || !tournament.rounds) return;
+    console.log("this is fill with cpu function ");
+
+    // fill blanks with cpu
+    let currentCPUindex = 0;
+    let currentRound = { ...tournament?.rounds?.[0] };
+    const cpuPlayers = Array(currentRound?.matches?.length * 2 || 16)
+      .fill(null)
+      .map((_, i) => createCpuPlayer(i + 1));
+    let registeredPlayers = tournament.registeredPlayers;
+    const newRound = {
+      ...currentRound,
+      matches: currentRound?.matches?.map((match, index) => {
+        return {
+          ...match,
+          players: match.players?.map((player, ind) => {
+            if (!player) {
+              console.log(currentCPUindex, cpuPlayers[currentCPUindex]);
+              registeredPlayers?.push({
+                clubId: `cpu-club-${currentCPUindex}`,
+                clubName: "cpu-club",
+                playerId: cpuPlayers[currentCPUindex].id,
+                playerName: cpuPlayers[currentCPUindex].name,
+                registered: Date.now(),
+              });
+              return cpuPlayers[currentCPUindex++];
+            } else return player;
+          }),
+        };
+      }),
+    };
+
+    console.log("this is updated round before update ", newRound);
+    let updatedTournament: Tournament = {
+      ...tournament,
+      rounds: tournament?.rounds?.map((round, index) => {
+        if (index == 0) return newRound;
+        else return round;
+      }),
+      registeredPlayers: registeredPlayers,
+    };
+    console.log("this is updated Tournament ", updatedTournament);
+    setTournaments((prev) =>
+      prev.map((t) => (t.id === selectedTournament.id ? updatedTournament : t))
+    );
+    setSelectedTournament(updatedTournament);
+    return newRound;
+  };
+
+  useEffect(() => {
+    console.log("this is changed tournament ", tournaments);
+  }, [tournaments]);
 
   const handleRegistration = (tournamentId: string, playerIds: string[]) => {
     // onRegister(tournamentId, playerIds);
     // console.log("on register", playerIds);
-    if (playerIds.length === 0 || playerIds.length > 1) return;
+    if (playerIds.length === 0 /*  || playerIds.length > 1 */) return;
     setCurrentPlayer(playerIds[0]);
+
+    const genFromId = (playerId: string[]) => {
+      /* {
+        playerId: player.id,
+        playerName: player.name,
+        clubId: 'cpu',
+        clubName: 'CPU Club',
+        registered: Date.now() - Math.random() * 3600000
+      } */
+      // console.log("this is pure player id", playerId);
+      return playerId.map((id, idx) => {
+        let pp = gameState.players.find((p) => p.id == id);
+        return {
+          playerId: pp.id,
+          playerName: pp.name,
+          clubId: "club ",
+          clubName: "My Club",
+          registered: Date.now(),
+        };
+      });
+    };
+    // f(playerIds);
     const tournament = tournaments.find((t) => t.id === tournamentId);
     // console.log(tournament);
-    const newPlayerState = gameState.players.find(
-      (player) => player.id == playerIds[0]
-    );
+    // console.log("newPlayerState ", playerIds);
+    const newPlayerState = gameState.players.filter((player) => {
+      if (
+        tournament?.registeredPlayers?.some(
+          (pl, idx) => pl.playerId == player.id
+        )
+      )
+        return false;
+      return playerIds.includes(player.id);
+    });
+    // console.log("newPlayerState ", newPlayerState);
+
     if (tournament) {
       const updatedTournament = {
         ...tournament,
         rounds: tournament.rounds?.map((round, roundIndex) => {
+          // console.log(roundIndex, round);
           if (roundIndex === 0) {
+            // console.log(round);
             return {
               ...round,
-              matches: round.matches.map((match) => {
-                if (match.players.some((p) => !p)) {
-                  return {
-                    ...match,
-                    players: match.players.map((p) => p || newPlayerState),
-                  };
-                }
-                return match;
-              }),
+              matches: (() => {
+                let newPlayerIndex = 0; // Track which player from newPlayerState to use
+
+                return round.matches.map((match) => {
+                  if (newPlayerIndex < newPlayerState.length) {
+                    // console.log(match);
+                    return {
+                      ...match,
+                      players: match.players.map((p) =>
+                        !p && newPlayerIndex < newPlayerState.length
+                          ? newPlayerState[newPlayerIndex++]
+                          : p
+                      ),
+                    };
+                  }
+                  return match;
+                });
+              })(),
             };
           }
           return round;
         }),
+        registeredPlayers: Array.from(
+          new Set(
+            (tournament.registeredPlayers || [])
+              .concat(genFromId(playerIds) || [])
+              .map((player) => player.playerId)
+          )
+        ).map(
+          (id) =>
+            (tournament.registeredPlayers || []).find(
+              (player) => player.playerId === id
+            ) ||
+            (genFromId(playerIds) || []).find(
+              (player) => player.playerId === id
+            )
+        ),
       };
+      // console.log("this is updated tour ", updatedTournament);
       setTournaments((prev) =>
         prev.map((t) => (t.id === tournamentId ? updatedTournament : t))
       );
-      // console.log("this is updated tournament ", updatedTournament);
-      console.log("this is updatedTournament", updatedTournament);
+      // console.log("updated tou", updatedTournament);
       setSelectedTournament(updatedTournament);
 
       const firstRoundMatch = updatedTournament.rounds?.[0].matches.findIndex(
@@ -237,6 +393,8 @@ export default function TournamentsPage() {
   const filteredTournaments = tournaments.filter(
     (tournament) => selectedTier === "all" || tournament.tier === selectedTier
   );
+
+  const finishTournament = (p1: Player, p2: Player) => {};
 
   return (
     <div className="space-y-6">
@@ -281,9 +439,12 @@ export default function TournamentsPage() {
         <TournamentBracket
           rounds={selectedTournament.rounds}
           currentPlayerId={currentPlayer}
+          registeredPLayers={selectedTournament.registeredPlayers}
           startTime={selectedTournament.startDate}
           onMatchSelect={setCurrentMatchIndex}
           onStartMatch={setCurrentPlayer}
+          fillWithCPU={fillWithCpu}
+          finishTournament={finishTournament}
         />
       ) : (
         <TournamentList

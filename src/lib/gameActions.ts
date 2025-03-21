@@ -1,6 +1,6 @@
 // Local game actions without database
 import { calculateTrainingTime, calculateUpgradeTime } from '@/utils/timeCalculator';
-import { Player, Facility, PlayerStrategy, Resources, Injury } from '../types/game';
+import { Player, Facility, PlayerStrategy, Resources, Injury, PlayHistory } from '../types/game';
 import { supabase } from './supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUpgradedFacility } from '@/utils/facilityUtils';
@@ -14,7 +14,7 @@ export async function recordResourceUpdate(userId: string | undefined, source: s
     source: source
   }));
 
-  await supabase.rpc("batch_resource_transactions", {p_user_id: userId, p_transactions: data});
+  await supabase.rpc("batch_resource_transactions", { p_user_id: userId, p_transactions: data });
 
 }
 
@@ -165,11 +165,11 @@ export async function recordEquipmentChange(
     }])
     .eq('id', player.id);
   // Local implementation - no database needed
-  console.log('Equipment change:', { 
-    player: player.name, 
-    equipment: equipment.name, 
+  console.log('Equipment change:', {
+    player: player.name,
+    equipment: equipment.name,
     action,
-    costs 
+    costs
   });
 }
 
@@ -188,4 +188,27 @@ export async function recordInjuriesChange(
       injuries: updatedInjuries,
     }])
     .eq('id', player.id);
+}
+
+
+export async function recordMatch(
+  player1: Player,
+  player2: Player,
+  result: PlayHistory
+) {
+  if (!player1 || !player2) return;
+  await supabase.from('player_play_history').insert([{
+    player1_id: player1.id.includes('cpu') ? null : player1.id,
+    player2_id: player2.id.includes('cpu') ? null : player2.id,
+    result: result.result,
+    player1_rank: result.level1,
+    player2_rank: result.level2,
+  }]);
+}
+
+export async function updatePlayerRank(player: string) {
+  const { data, error } = await supabase.rpc("update_player_rank", { player_id: player });
+  if (!error) {
+    return data;
+  }
 }

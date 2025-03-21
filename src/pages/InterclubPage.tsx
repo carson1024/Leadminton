@@ -188,7 +188,7 @@ export default function InterclubPage() {
               <span>Joueurs du Club</span>
             </div>
             <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-              See All...
+              Voir tout...
             </button>
           </h2>
 
@@ -287,7 +287,7 @@ export default function InterclubPage() {
               <span>Classement de la poule</span>
             </div>
             <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-              See All...
+              Voir tout...
             </button>
           </h2>
 

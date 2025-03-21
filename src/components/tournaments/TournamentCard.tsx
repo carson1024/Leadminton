@@ -27,9 +27,34 @@ export default function TournamentCard({
   const tierLabel = getTierLabel(tournament.tier);
   const timeLeft = useCountdown(tournament.startDate, tournament.endDate);
 
-  const formatTimeLeft = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    return `${seconds}s`;
+  const formatTimeLeft = (ms: number): string => {
+    const seconds = Math.floor(ms / 1000) % 60;
+    const minutes = Math.floor(ms / (1000 * 60)) % 60;
+    const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+    const parts: string[] = [];
+
+    if (days > 0) {
+      parts.push(`${days}d`);
+      if (hours > 0) parts.push(`${hours}h`); // Include hours if days are present
+    } else if (hours > 0) {
+      parts.push(`${hours}h`); // Include hours if no days
+    }
+
+    if (minutes > 0) {
+      parts.push(`${minutes}m`);
+    } else if (parts.length > 0) {
+      parts.push(`0m`); // Show 0m if there are higher units
+    }
+
+    if (seconds > 0) {
+      parts.push(`${seconds}s`);
+    } else if (parts.length > 0) {
+      parts.push(`0s`); // Show 0s if there are higher units
+    }
+
+    return parts.join(" ");
   };
 
   useEffect(() => {

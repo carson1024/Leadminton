@@ -81,6 +81,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     [resources, user]
   );
 
+  const loadTournament = async (players: Player[]) => {
+    console.log("this is game state from gameUtils ", players);
+    setTournaments(await loadTournaments(players));
+  };
+
   const loadState = async () => {
     if (!user || !user.email) {
       dispatch({ type: "SET_GAME_STATE", payload: { state: initialState } });
@@ -90,10 +95,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // console.log("---    ---    ----    -----", initialState);
     const state = await loadGameState();
     dispatch({ type: "SET_GAME_STATE", payload: { state: state } });
-  };
-
-  const loadTournament = async () => {
-    setTournaments(await loadTournaments());
+    await loadTournament(state.players);
   };
 
   useEffect(() => {
@@ -108,7 +110,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const timer = setInterval(loadResource, 60000);
     loadResource();
     loadState();
-    loadTournament();
     // setTournaments(await loadTournaments());
 
     return () => clearInterval(timer);

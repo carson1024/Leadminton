@@ -9,35 +9,35 @@ interface InjuryType {
 }
 
 const INJURIES: InjuryType[] = [
-  { 
+  {
     type: 'Ankle sprain',
     severity: 'minor',
     recovery: 30,
     affectedStats: ['speed', 'agility'],
     statPenalty: 20
   },
-  { 
+  {
     type: 'Muscle strain',
     severity: 'minor',
     recovery: 45,
     affectedStats: ['strength', 'explosiveness'],
     statPenalty: 25
   },
-  { 
+  {
     type: 'Knee pain',
     severity: 'moderate',
     recovery: 60,
     affectedStats: ['speed', 'agility', 'explosiveness'],
     statPenalty: 30
   },
-  { 
+  {
     type: 'Wrist sprain',
     severity: 'moderate',
     recovery: 90,
     affectedStats: ['smash', 'defense', 'serve'],
     statPenalty: 35
   },
-  { 
+  {
     type: 'Back injury',
     severity: 'severe',
     recovery: 120,
@@ -55,14 +55,14 @@ function calculateInjuryRisk(player: Player): number {
 
 export function checkForInjury(player: Player): Injury | null {
   const injuryRisk = calculateInjuryRisk(player);
-  
+
   // Force an injury for the test
   const roll = Math.random();
-  
+
   if (roll < injuryRisk) {
     const injuryType = INJURIES[Math.floor(Math.random() * INJURIES.length)];
     const now = Date.now();
-    
+
     let affectedStats: Partial<PlayerStats> | undefined;
     if (injuryType.affectedStats && injuryType.statPenalty) {
       affectedStats = {};
@@ -72,11 +72,11 @@ export function checkForInjury(player: Player): Injury | null {
       });
     }
 
-    console.log('Creating injury:', {
+    /* console.log('Creating injury:', {
       type: injuryType.type,
       severity: injuryType.severity,
       affectedStats
-    });
+    }); */
 
     return {
       id: `injury-${now}-${Math.random().toString(36).substr(2, 9)}`,
@@ -88,7 +88,6 @@ export function checkForInjury(player: Player): Injury | null {
       createdAt: now
     };
   }
-  
   return null;
 }
 
@@ -106,7 +105,6 @@ export function calculateTotalInjuryEffect(player: Player): Partial<PlayerStats>
   if (activeInjuries.length === 0) return {};
 
   const totalEffect: Partial<PlayerStats> = {};
-  
   activeInjuries.forEach(injury => {
     if (injury.affectedStats) {
       Object.entries(injury.affectedStats).forEach(([stat, value]) => {

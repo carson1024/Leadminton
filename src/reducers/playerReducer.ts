@@ -10,6 +10,7 @@ type PlayerAction =
   | { type: 'UPDATE_STRATEGY'; payload: { playerId: string; strategy: PlayerStrategy } }
   | { type: 'UPDATE_PLAYER_NAME'; payload: { playerId: string; name: string } }
   | { type: 'ADD_INJURY'; payload: { playerId: string; injury: any } }
+  | { type: 'UPDATE_RANK'; payload: { playerId: string; rank: number } }
   | { type: 'HEAL_INJURY'; payload: { playerId: string; injuryId: string } };
 
 export function playerReducer(players: Player[], action: PlayerAction): Player[] {
@@ -23,13 +24,13 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
       return players.map(player =>
         player.id === action.payload.playerId
           ? {
-              ...player,
-              training: {
-                stat: action.payload.stat,
-                startTime: Date.now(),
-                period: calculateTrainingTime(player.statLevels[action.payload.stat]),
-              },
-            }
+            ...player,
+            training: {
+              stat: action.payload.stat,
+              startTime: Date.now(),
+              period: calculateTrainingTime(player.statLevels[action.payload.stat]),
+            },
+          }
           : player
       );
 
@@ -37,18 +38,18 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
       return players.map(player =>
         player.id === action.payload.playerId && player.training
           ? {
-              ...player,
-              stats: {
-                ...player.stats,
-                [player.training.stat]: player.stats[player.training.stat] + 5,
-              },
-              statLevels: {
-                ...player.statLevels,
-                [player.training.stat]: player.statLevels[player.training.stat] + 1,
-              },
-              level: player.level + 1,
-              training: undefined,
-            }
+            ...player,
+            stats: {
+              ...player.stats,
+              [player.training.stat]: player.stats[player.training.stat] + 5,
+            },
+            statLevels: {
+              ...player.statLevels,
+              [player.training.stat]: player.statLevels[player.training.stat] + 1,
+            },
+            level: player.level + 1,
+            training: undefined,
+          }
           : player
       );
 
@@ -56,21 +57,21 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
       return players.map(player =>
         player.id === action.payload.playerId
           ? {
-              ...player,
-              strategy: action.payload.strategy,
-            }
+            ...player,
+            strategy: action.payload.strategy,
+          }
           : player
       );
     case 'EQUIP_ITEM':
       return players.map(player =>
         player.id === action.payload.playerId
           ? {
-              ...player,
-              equipment: {
-                ...player.equipment,
-                [action.payload.equipment.type]: action.payload.equipment,
-              },
-            }
+            ...player,
+            equipment: {
+              ...player.equipment,
+              [action.payload.equipment.type]: action.payload.equipment,
+            },
+          }
           : player
       );
 
@@ -81,13 +82,16 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
           : player
       );
 
+    case 'UPDATE_RANK':
+      return players.map(player => player.id === action.payload.playerId ? { ...player, rank: action.payload.rank } : player)
+
     case 'ADD_INJURY':
       return players.map(player =>
         player.id === action.payload.playerId
           ? {
-              ...player,
-              injuries: [...(player.injuries || []), action.payload.injury],
-            }
+            ...player,
+            injuries: [...(player.injuries || []), action.payload.injury],
+          }
           : player
       );
 
@@ -95,9 +99,9 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
       return players.map(player =>
         player.id === action.payload.playerId
           ? {
-              ...player,
-              injuries: player.injuries.filter(injury => injury.id !== action.payload.injuryId),
-            }
+            ...player,
+            injuries: player.injuries.filter(injury => injury.id !== action.payload.injuryId),
+          }
           : player
       );
 

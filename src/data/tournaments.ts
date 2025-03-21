@@ -1,9 +1,10 @@
 import { Tournament } from '../types/tournament';
 import { generateRandomName } from '../utils/nameGenerator';
 
-const createCpuPlayer = (id: number, baseLevel: number = 1) => ({
+export const createCpuPlayer = (id: number, baseLevel: number = 1) => ({
   id: `cpu-${id}`,
   name: generateRandomName('male'),
+  rank: Math.floor(Math.random() * 450),
   level: Math.max(1, baseLevel + Math.floor(Math.random() * 3) - 1),
   stats: {
     endurance: 50,
@@ -106,7 +107,7 @@ export const MOCK_TOURNAMENTS: Tournament[] = [
       clubName: 'CPU Club',
       registered: Date.now() - Math.random() * 3600000
     }))
-  },{
+  }, {
     id: 'local-2',
     name: 'Town Championship',
     tier: 'local',
@@ -177,22 +178,22 @@ export const MOCK_TOURNAMENTS: Tournament[] = [
         matches: [
           {
             id: '1',
-            players: [null,null],
+            players: [null, null],
             completed: false
           },
           {
             id: '2',
-            players: [null,null],
+            players: [null, null],
             completed: false
           },
           {
             id: '3',
-            players: [null,null],
+            players: [null, null],
             completed: false
           },
           {
             id: '4',
-            players: [null,null],
+            players: [null, null],
             completed: false
           }
         ]
