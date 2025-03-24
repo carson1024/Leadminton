@@ -45,7 +45,7 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
       let tooltipText;
       if (relativeX <= (progressWidth / 100) * rect.width) {
         // Cursor is inside the active progress area → Show rank score
-        tooltipText = "P" + name;
+        tooltipText = /* "P" + name */ rankPoints[12 - name];
       } else {
         // Cursor is in the remaining bar area → Show rank name
         tooltipText = rankPoints[hoveredRank] || "Unknown Rank";

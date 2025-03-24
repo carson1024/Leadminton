@@ -1,30 +1,54 @@
-import React from 'react';
-import { Users } from 'lucide-react';
-import { GameState, Resources, Player, PlayerStrategy } from '../types/game';
-import PlayerCard from '../components/player/PlayerCard';
-import RecruitButton from '../components/club/RecruitButton';
-import { calculateTrainingCost, calculateSpeedUpCost, calculateNewPlayerCost } from '../utils/costCalculator';
-import { calculateTrainingTime } from '../utils/timeCalculator';
-import { generateRandomName } from '../utils/nameGenerator';
-import { generateInitialStats, generateInitialStatLevels } from '@/utils/initialState';
-import { recordTrainingStart, recordTrainingComplete, recordEquipmentChange, recordPlayerStrategyChange, recordInjuriesChange } from '../lib/gameActions';
-import { Equipment } from '../types/equipment';
-import { useGame } from '@/contexts/GameContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { createPlayer, updateName } from '@/utils/gameUtils';
+import React from "react";
+import { Users } from "lucide-react";
+import { GameState, Resources, Player, PlayerStrategy } from "../types/game";
+import PlayerCard from "../components/player/PlayerCard";
+import RecruitButton from "../components/club/RecruitButton";
+import {
+  calculateTrainingCost,
+  calculateSpeedUpCost,
+  calculateNewPlayerCost,
+} from "../utils/costCalculator";
+import { calculateTrainingTime } from "../utils/timeCalculator";
+import { generateRandomName } from "../utils/nameGenerator";
+import {
+  generateInitialStats,
+  generateInitialStatLevels,
+} from "@/utils/initialState";
+import {
+  recordTrainingStart,
+  recordTrainingComplete,
+  recordEquipmentChange,
+  recordPlayerStrategyChange,
+  recordInjuriesChange,
+} from "../lib/gameActions";
+import { Equipment } from "../types/equipment";
+import { useGame } from "@/contexts/GameContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { createPlayer, updateName } from "@/utils/gameUtils";
 
 export default function ClubPage() {
-  
-  const { resources, gameState, updateResources, dispatchGameState, setGameState } = useGame();
+  const {
+    resources,
+    gameState,
+    updateResources,
+    dispatchGameState,
+    setGameState,
+  } = useGame();
   const { user } = useAuth();
 
   const handleNameChange = async (playerId: string, newName: string) => {
     updateName(playerId, newName);
-    dispatchGameState({ type: 'UPDATE_PLAYER_NAME', payload: { playerId, name: newName } })
-  }
+    dispatchGameState({
+      type: "UPDATE_PLAYER_NAME",
+      payload: { playerId, name: newName },
+    });
+  };
 
-  const handleStartTraining = async (playerId: string, stat: keyof Player['stats']) => {
-    const player = gameState.players.find(p => p.id === playerId);
+  const handleStartTraining = async (
+    playerId: string,
+    stat: keyof Player["stats"]
+  ) => {
+    const player = gameState.players.find((p) => p.id === playerId);
     if (!player || player.training || player.level >= player.maxLevel) return;
 
     const trainingCost = calculateTrainingCost(player, stat);
@@ -38,104 +62,120 @@ export default function ClubPage() {
 
     updateResources("training_cost", trainingCost, false);
 
-    dispatchGameState({type: 'START_TRAINING', payload: {playerId, stat}});
+    dispatchGameState({ type: "START_TRAINING", payload: { playerId, stat } });
   };
 
-  const handleUpdateStrategy = async (playerId: string, strategy: PlayerStrategy) => {
-    const player = gameState.players.find(p => p.id === playerId);
+  const handleUpdateStrategy = async (
+    playerId: string,
+    strategy: PlayerStrategy
+  ) => {
+    const player = gameState.players.find((p) => p.id === playerId);
     if (!player) return;
 
     if (player.strategy == strategy) return;
 
     await recordPlayerStrategyChange(playerId, strategy);
 
-    dispatchGameState({type: 'UPDATE_STRATEGY', payload: {playerId, strategy}});
-  }
+    dispatchGameState({
+      type: "UPDATE_STRATEGY",
+      payload: { playerId, strategy },
+    });
+  };
 
   const handleSpeedUpTraining = async (playerId: string) => {
-    const player = gameState.players.find(p => p.id === playerId);
+    const player = gameState.players.find((p) => p.id === playerId);
     if (!player?.training) return;
 
-    const timeLeft = player.training.startTime + player.training.period - Date.now();
+    const timeLeft =
+      player.training.startTime + player.training.period - Date.now();
     const diamondCost = calculateSpeedUpCost(timeLeft);
 
     if (resources.diamonds < diamondCost) return;
 
     updateResources("training_cost", {
-      diamonds: -diamondCost
+      diamonds: -diamondCost,
     });
 
     const newStatValue = player.stats[player.training.stat] + 5;
     await recordTrainingComplete(player, player.training.stat, newStatValue);
 
-    dispatchGameState({ type: 'COMPLETE_TRAINING', payload: { playerId } });
+    dispatchGameState({ type: "COMPLETE_TRAINING", payload: { playerId } });
   };
 
   const handleEquipItem = async (playerId: string, equipment: Equipment) => {
-    const player = gameState.players.find(p => p.id === playerId);
+    const player = gameState.players.find((p) => p.id === playerId);
     if (!player) return;
 
     updateResources("training_cost", equipment.price, false);
 
-    await recordEquipmentChange(player, equipment, 'equip');
+    await recordEquipmentChange(player, equipment, "equip");
 
-    dispatchGameState({ type: 'EQUIP_ITEM', payload: { playerId, equipment } });
+    dispatchGameState({ type: "EQUIP_ITEM", payload: { playerId, equipment } });
   };
 
   const handleRecruitPlayer = async () => {
     const cost = calculateNewPlayerCost(gameState.players.length);
-    const maxPlayers = gameState.facilities.find(f => f.type === 'training-center')?.maxPlayers || 1;
+    const maxPlayers =
+      gameState.facilities.find((f) => f.type === "training-center")
+        ?.maxPlayers || 1;
 
-    if (gameState.players.length >= maxPlayers || resources.coins < cost) return;
+    if (gameState.players.length >= maxPlayers || resources.coins < cost)
+      return;
 
     updateResources("training_cost", {
-      coins: -cost
+      coins: -cost,
     });
 
     if (user?.id) {
       const player = await createPlayer(user.id);
-      dispatchGameState({ type: 'ADD_PLAYER', payload: { player } });
+      dispatchGameState({ type: "ADD_PLAYER", payload: { player } });
     }
   };
 
-  const handleHeal = (playerId: string, itemId: string, recoveryReduction: number) => {
+  const handleHeal = (
+    playerId: string,
+    itemId: string,
+    recoveryReduction: number
+  ) => {
     const HEALING_ITEMS = {
-      'bandage': 2,
-      'first-aid-kit': 4,
-      'medical-kit': 8
+      bandage: 2,
+      "first-aid-kit": 4,
+      "medical-kit": 8,
     };
 
     const cost = HEALING_ITEMS[itemId as keyof typeof HEALING_ITEMS];
     if (!cost || resources.diamonds < cost) return;
 
     updateResources("training_cost", {
-      diamonds: -cost
+      diamonds: -cost,
     });
 
-    setGameState(prev => ({
+    setGameState((prev) => ({
       ...prev,
-      players: prev.players.map(player => {
+      players: prev.players.map((player) => {
         if (player.id === playerId && player.injuries) {
           const now = Date.now();
           // Appliquer la réduction à toutes les blessures actives
-          const updatedInjuries = player.injuries.filter(injury => injury.recoveryEndTime > now).map(injury => {
-            const remainingTime = injury.recoveryEndTime - now;
-            const reducedTime = remainingTime * (1 - recoveryReduction);
-            return {
-              ...injury,
-              recoveryEndTime: now + reducedTime
-            };
-          });
+          const updatedInjuries = player.injuries
+            .filter((injury) => injury.recoveryEndTime > now)
+            .map((injury) => {
+              const remainingTime = injury.recoveryEndTime - now;
+              const reducedTime = remainingTime * (1 - recoveryReduction);
+              return {
+                ...injury,
+                recoveryEndTime: now + reducedTime,
+              };
+            });
 
           recordInjuriesChange(player, updatedInjuries);
 
           return {
             ...player,
-            injuries: updatedInjuries
+            injuries: updatedInjuries,
           };
         }
         return player;
-      })
+      }),
     }));
   };
 
@@ -148,7 +188,10 @@ export default function ClubPage() {
         </div>
         <RecruitButton
           currentPlayers={gameState.players.length}
-          maxPlayers={gameState.facilities.find(f => f.type === 'training-center')?.maxPlayers || 1}
+          maxPlayers={
+            gameState.facilities.find((f) => f.type === "training-center")
+              ?.maxPlayers || 1
+          }
           coins={resources.coins}
           onRecruit={handleRecruitPlayer}
         />
@@ -161,15 +204,18 @@ export default function ClubPage() {
             player={player}
             onStartTraining={handleStartTraining}
             calculateTrainingCost={calculateTrainingCost}
-            canAffordTraining={(cost) => 
+            canAffordTraining={(cost) =>
               Object.entries(cost).every(
-                ([resource, amount]) => resources[resource as keyof Resources] >= amount
+                ([resource, amount]) =>
+                  resources[resource as keyof Resources] >= amount
               )
             }
             onNameChange={handleNameChange}
             onUpdateStrategy={handleUpdateStrategy}
             onSpeedUpTraining={handleSpeedUpTraining}
-            canAffordSpeedUp={(diamondCost) => resources.diamonds >= diamondCost}
+            canAffordSpeedUp={(diamondCost) =>
+              resources.diamonds >= diamondCost
+            }
             resources={resources}
             onEquipItem={handleEquipItem}
             onHeal={handleHeal}

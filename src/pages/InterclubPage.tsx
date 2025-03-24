@@ -17,6 +17,7 @@ import { calculatePlayerScore } from "../utils/playerScore";
 export default function InterclubPage() {
   const { resources, gameState } = useGame();
   const [showIntro, setShowIntro] = useState(true);
+  const [showAllPlayer, setShowAllPlayer] = useState(false);
 
   // Page d'introduction des interclubs  Interclub introductory page
   if (showIntro) {
@@ -187,30 +188,36 @@ export default function InterclubPage() {
               <Users className="w-5 h-5 text-blue-500" />
               <span>Joueurs du Club</span>
             </div>
-            <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
-              Voir tout...
+            <button
+              className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => setShowAllPlayer(!showAllPlayer)}
+            >
+              {showAllPlayer ? " Afficher Moins" : "Voir tout..."}
             </button>
           </h2>
 
           <div className="space-y-3">
-            {gameState.players.map((player) => (
-              <div
-                key={player.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="text-sm font-medium">{player.name}</div>
-                  <div className="text-xs text-gray-500">
-                    Niveau {player.level}
+            {gameState.players.map((player, index) => {
+              if (index >= 2 && !showAllPlayer) return;
+              return (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="text-sm font-medium">{player.name}</div>
+                    <div className="text-xs text-gray-500">
+                      Niveau {player.level}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                      Score: {calculatePlayerScore(player).score}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                    Score: {calculatePlayerScore(player).score}
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
