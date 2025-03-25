@@ -12,6 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
     "@types/express": "^5.0.0",
+    "core-js": "^3.41.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "lucide-react": "^0.344.0",
@@ -19,6 +20,8 @@
     "react-dom": "^18.3.1",
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^7.2.0",
+    "react-svg-tournament-bracket": "^1.4.1",
+    "react-tournament-brackets": "^1.0.40",
     "react-zoom-pan-pinch": "^3.4.3",
     "vite-plugin-api-routes": "^1.2.0-beta"
   },
