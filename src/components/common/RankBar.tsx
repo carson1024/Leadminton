@@ -12,50 +12,67 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
     y: 0,
     content: "",
   });
-  const barRef = useRef<HTMLDivElement>(null);
-  const progressWidth = Math.floor((rank * 100) / 450); // Active area width
 
-  const rankPoints: { [key: number]: string } = {
-    0: "P12",
-    1: "P11",
-    2: "P10",
-    3: "D9",
-    4: "D8",
-    5: "D7",
-    6: "R6",
-    7: "R5",
-    8: "R4",
-    9: "N3",
-    10: "N2",
-    11: "N1",
+  const barRef = useRef<HTMLDivElement>(null);
+
+  // ✅ Calculate the progress width for the current rank (normal calculation)
+  const progressWidth = Math.floor((rank * 100) / 450);
+
+  // Rank Weights for Tooltip Hover
+  const rankWeights: { [key: string]: number } = {
+    P12: 5,
+    P11: 2.67,
+    P10: 5,
+    D9: 5,
+    D8: 5,
+    D7: 5,
+    R6: 6.66,
+    R5: 8.33,
+    R4: 8.33,
+    N3: 9.66,
+    N2: 15.66,
+    N1: 16,
   };
 
-  const totalRanks = 12;
+  const rankPoints = Object.keys(rankWeights);
+  const totalWeight = Object.values(rankWeights).reduce((acc, w) => acc + w, 0);
+
+  // Cumulative weight mapping
+  const cumulativeWeights: { [key: string]: number } = {};
+  let accumulated = 0;
+  rankPoints.forEach((rank) => {
+    cumulativeWeights[rank] = accumulated;
+    accumulated += (rankWeights[rank] / totalWeight) * 100;
+  });
+
+  // Calculate the current rank's position
+  const currentRankPosition = (rank / 450) * 100;
+
+  // Find the next level's starting position and name
+  const nextRank = rankPoints.find(
+    (rank) => cumulativeWeights[rank] > currentRankPosition
+  );
+  const nextRankPosition = nextRank ? cumulativeWeights[nextRank] : 100; // Default to 100 if there's no next rank
+  const nextRankName = nextRank || "N/A"; // Default to "N/A" if there's no next rank
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (barRef.current) {
       const rect = barRef.current.getBoundingClientRect();
-      const relativeX = e.clientX - rect.left; // Mouse position relative to the bar
-      const widthPerRank = rect.width / totalRanks; // Divide bar into 12 sections
-      const hoveredRank = Math.min(
-        Math.floor(relativeX / widthPerRank),
-        totalRanks - 1
-      ); // Determine hovered rank
+      const relativeX = e.clientX - rect.left;
+      const percentage = (relativeX / rect.width) * 100;
 
-      let tooltipText;
-      if (relativeX <= (progressWidth / 100) * rect.width) {
-        // Cursor is inside the active progress area → Show rank score
-        tooltipText = /* "P" + name */ rankPoints[12 - name];
-      } else {
-        // Cursor is in the remaining bar area → Show rank name
-        tooltipText = rankPoints[hoveredRank] || "Unknown Rank";
+      let hoveredRank = "Unknown Rank";
+      for (let i = 0; i < rankPoints.length; i++) {
+        if (percentage >= cumulativeWeights[rankPoints[i]]) {
+          hoveredRank = rankPoints[i];
+        }
       }
 
       setTooltip({
         visible: true,
         x: relativeX,
         y: -30,
-        content: tooltipText,
+        content: hoveredRank,
       });
     }
   };
@@ -66,17 +83,38 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
 
   return (
     <div
-      className="relative w-full h-6 bg-gray-300 rounded-md"
+      className="relative w-full bg-gray-300 rounded-md"
       ref={barRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ height: "5px" }}
     >
-      {/* Active Progress Area */}
+      {/* ✅ Blue Progress Bar (Primary Rank Progress) */}
       <div
         className="h-full bg-blue-500 transition-all duration-500 rounded-md"
-        style={{ width: `${progressWidth}%` }}
+        style={{ width: `${progressWidth > 100 ? 100 : progressWidth}%` }}
       />
+
+      {/* 🔴 Red Line at the Next Rank Level Position */}
+      <div
+        className="absolute top-0 h-full w-[2px] bg-red-500"
+        style={{
+          left: `${nextRankPosition}%`, // Position the red line at the next level's progress
+          transform: "translateX(-50%)",
+        }}
+      />
+
+      {/* Next Level Name above the red line */}
+      <span
+        className="absolute text-xs text-center text-black font-semibold"
+        style={{
+          left: `${nextRankPosition}%`, // Align the text above the red line
+          top: "-20px", // Position it just above the red line
+          transform: "translateX(-50%)",
+        }}
+      >
+        {nextRankName}
+      </span>
 
       {/* Tooltip */}
       {tooltip.visible && (

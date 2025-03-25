@@ -1,8 +1,397 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Trophy, Timer } from "lucide-react";
 import { Match, TournamentRound } from "../../types/tournament";
 import { RegisteredPlayer } from "../../types/tournament";
 import { createCpuPlayer } from "@/data/tournaments";
+// import { Bracket } from "react-tournament-bracket";
+import { single, double } from "../data";
+import TournamentABracket from "react-svg-tournament-bracket";
+// import { SingleEliminationBracket } from "react-tournament-brackets";
+
+const myMatches = [
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+
+  {
+    homeTeamName: "Team A",
+    awayTeamName: "Team B",
+    round: 1,
+    matchNumber: 1,
+  },
+  {
+    homeTeamName: "Team C",
+    awayTeamName: "Team D",
+    round: 1,
+    matchNumber: 2,
+  },
+  {
+    homeTeamName: "Team E",
+    awayTeamName: "Team F",
+    round: 1,
+    matchNumber: 3,
+  },
+  {
+    homeTeamName: "Team G",
+    awayTeamName: "Team H",
+    round: 1,
+    matchNumber: 4,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 1",
+    awayTeamName: "Winner Match 2",
+    round: 2,
+    matchNumber: 5,
+  },
+  {
+    homeTeamName: "Winner Match 3",
+    awayTeamName: "Winner Match 4",
+    round: 2,
+    matchNumber: 6,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 3,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 4,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 4,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 4,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 4,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 5,
+    matchNumber: 7,
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 5,
+    matchNumber: "asdfdsafd",
+  },
+  {
+    homeTeamName: "Winner Match 5",
+    awayTeamName: "Winner Match 6",
+    round: 6,
+    matchNumber: 7,
+  },
+];
 interface TournamentBracketProps {
   rounds: TournamentRound[];
   currentPlayerId: string;
@@ -28,10 +417,48 @@ export default function TournamentBracket({
   );
   // console.log("this is round bracket", rounds);
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
+  const parentDiv = useRef();
+  const [clientWidth, setclientWidth] = useState();
+  const [realMatch, setRealMatch] = useState([]);
   useEffect(() => {
     // console.log("changing the rounds ", rounds);
   }, [rounds]);
+
+  const handleResize = () => {
+    if (parentDiv.current) {
+      setclientWidth(parentDiv.current.offsetWidth);
+    }
+  };
+
+  const resizeObserver = new ResizeObserver(handleResize);
+
+  if (parentDiv.current) {
+    resizeObserver.observe(parentDiv.current);
+  }
+
+  useEffect(() => {
+    if (rounds) {
+      // setRealMatch(new Array(Math.pow(2, rounds.length) - 1));
+      let result = new Array();
+      console.log(rounds);
+      result = rounds.flatMap((round, index) =>
+        round.matches.map((match) => ({
+          homeTeamName: match.players[0]?.name || "...",
+          awayTeamName: match.players[1]?.name || "...",
+          round: index + 1,
+          matchNumber: round.name,
+          matchComplete: match.completed,
+          matchAccepted: match.completed,
+          homeTeamScore: match.winner?.id == match.players[0]?.id ? 2 : 1,
+          awayTeamScore: match.winner?.id == match.players[0]?.id ? 1 : 2,
+        }))
+      );
+
+      console.log(result);
+      setRealMatch(result);
+    }
+  }, [rounds]);
+  useEffect(() => {}, [rounds]);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -195,85 +622,21 @@ export default function TournamentBracket({
           )}
         </svg>
 
-        <div className="relative flex">
-          {rounds.map((round, roundIndex) => (
-            <div
-              key={roundIndex}
-              className="flex-1 flex flex-col"
-              style={{ gap: "80px" }}
-            >
-              {round.matches.map((match, matchIndex) => (
-                <div
-                  key={`${roundIndex}-${matchIndex}`}
-                  className="relative mx-2"
-                  style={{
-                    marginTop:
-                      matchIndex === 0
-                        ? "0"
-                        : roundIndex === 1
-                        ? "80px"
-                        : roundIndex === 2
-                        ? "240px"
-                        : "0",
-                  }}
-                  // onClick={() => handleMatchClick(roundIndex, matchIndex)}
-                >
-                  {match.players.map((player, playerIndex) => (
-                    <div
-                      key={playerIndex}
-                      className={`h-12 px-4 flex items-center border-l-4 bg-white shadow-sm mb-1 
-                        ${
-                          /* player?.id == currentPlayerId */ registeredPLayers.some(
-                            (pl) => pl?.playerId == player?.id
-                          )
-                            ? "border-l-blue-500"
-                            : "border-l-gray-200"
-                        }
-                        ${
-                          match.players.some((p) => p?.id == currentPlayerId) &&
-                          !match.completed
-                            ? "cursor-pointer hover:bg-blue-50"
-                            : ""
-                        }
-                      `}
-                    >
-                      {player ? (
-                        <div className="flex justify-between items-center w-full">
-                          <div>
-                            <span className="font-medium">{player.name}</span>
-                            <span className="text-xs text-gray-500 ml-2">
-                              Level {player.level}
-                            </span>
-                          </div>
-                          {match.winner?.id === player.id && (
-                            <Trophy className="w-4 h-4 text-yellow-500" />
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">
-                          À déterminer
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                  {match.completed && match.score && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Score: {match.score}
-                    </div>
-                  )}
-                  {
-                    <div
-                      className="h-full bg-blue-500 transition-all duration-500 rounded-md"
-                      style={{
-                        width: match.completed ? "100%" : "0%",
-                        height: "4px",
-                      }}
-                    />
-                  }
-                </div>
-              ))}
-            </div>
-          ))}
+        <div ref={parentDiv} className="relative flex">
+          <TournamentABracket
+            height={1200}
+            matchHeight={90}
+            width={clientWidth}
+            matches={realMatch}
+            hidePKs={true}
+            popColor={"red"}
+            secondaryFinal={{
+              homeTeamName:
+                rounds[rounds?.length - 1].matches[0].winner?.name || "....",
+              awayTeamName: " ",
+              title: "Today's Champion",
+            }}
+          />
         </div>
       </div>
     </div>

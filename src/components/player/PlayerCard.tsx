@@ -274,7 +274,7 @@ export default function PlayerCard({
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-gray-700 mb-2">Rank</h4>
+                <h4 className="font-medium text-gray-700 mb-2 mb-5">Rank</h4>
                 <RankBar rank={player.rank} name={getRank(player.rank)} />
                 <div className="flex justify-between w-full">
                   <span>P12</span>
