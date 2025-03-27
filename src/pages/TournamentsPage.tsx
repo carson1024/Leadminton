@@ -13,6 +13,7 @@ import {
   recordMatch,
   updatePlayerRank,
 } from "@/lib/gameActions";
+import TournamentResult from "@/components/tournaments/TournamentResult";
 interface TournamentsPageProps {
   players: Player[];
   resources: Resources;
@@ -38,10 +39,12 @@ export default function TournamentsPage() {
   /* const [tournaments, setTournaments] = useState<Tournament[]>(
     MOCK_TOURNAMENTS.filter((t) => !t.isQuickTournament)
   ); */
+  const [tournamentFinished, setTournamentFinished] = useState(false);
   const [matchResult, setMatchResult] = useState<any>(null);
   const [currentMatchIndex, setCurrentMatchIndex] = useState<number | null>(
     null
   );
+  const [resultPlayerRank, setResultPlayerRank] = useState([]);
 
   const tiers: { value: TournamentTier | "all"; label: string }[] = [
     { value: "all", label: "All Tournaments" },
@@ -97,7 +100,7 @@ export default function TournamentsPage() {
           level1: player.rank,
           level2: opponent.rank,
         });
-        setMatchResult(result);
+        // setMatchResult(result);
         let newRank = await updatePlayerRank(
           gameState.players.some((p1, ind) => p1.id == player?.id)
             ? player.id
@@ -137,14 +140,14 @@ export default function TournamentsPage() {
     }
 
     // receive prize
-    if (gameState.players.some((pl, index) => pl.id == result.winner.id)) {
+    /* if (gameState.players.some((pl, index) => pl.id == result.winner.id)) {
       let reward: Partial<Record<keyof Resources, number>> = { coins: 200 };
       updateResources("tournament_reward", reward);
     }
     if (gameState.players.some((pl, index) => pl.id == result.loser.id)) {
       let reward: Partial<Record<keyof Resources, number>> = { coins: 200 };
       updateResources("tournament_reward", reward);
-    }
+    } */
 
     // win last currentRound
     console.log("currentRound.name", currentRound);
@@ -203,6 +206,10 @@ export default function TournamentsPage() {
           return round;
         });
 
+        if (currentRound == tournament?.rounds.length - 1) {
+          console.log("before finishing");
+          finishTournament({ ...selectedTournament, rounds: updatedRounds });
+        }
         return { ...t, rounds: updatedRounds };
       })
     );
@@ -270,6 +277,7 @@ export default function TournamentsPage() {
         else return round;
       }),
       registeredPlayers: registeredPlayers,
+      currentParticipants: tournament.currentParticipants + currentCPUindex - 1,
     };
     console.log("this is updated Tournament ", updatedTournament);
     setTournaments((prev) =>
@@ -278,10 +286,6 @@ export default function TournamentsPage() {
     setSelectedTournament(updatedTournament);
     return newRound;
   };
-
-  useEffect(() => {
-    console.log("this is changed tournament ", tournaments);
-  }, [tournaments]);
 
   const handleRegistration = (tournamentId: string, playerIds: string[]) => {
     // onRegister(tournamentId, playerIds);
@@ -334,22 +338,39 @@ export default function TournamentsPage() {
             return {
               ...round,
               matches: (() => {
-                let newPlayerIndex = 0; // Track which player from newPlayerState to use
+                const newMatches = round.matches.map((match) => ({
+                  ...match,
+                  players: [...match.players],
+                }));
 
-                return round.matches.map((match) => {
-                  if (newPlayerIndex < newPlayerState.length) {
-                    // console.log(match);
-                    return {
-                      ...match,
-                      players: match.players.map((p) =>
-                        !p && newPlayerIndex < newPlayerState.length
-                          ? newPlayerState[newPlayerIndex++]
-                          : p
-                      ),
-                    };
-                  }
-                  return match;
+                // Collect all empty player positions
+                const availablePositions = [];
+
+                newMatches.forEach((match, matchIndex) => {
+                  match.players.forEach((player, playerIndex) => {
+                    if (!player)
+                      availablePositions.push({ matchIndex, playerIndex });
+                  });
                 });
+
+                // Shuffle both available positions and new players randomly
+                const shuffledPositions = availablePositions.sort(
+                  () => Math.random() - 0.5
+                );
+                const shuffledPlayers = [...newPlayerState].sort(
+                  () => Math.random() - 0.5
+                );
+
+                // Assign shuffled players to **random** positions
+                shuffledPositions.forEach(({ matchIndex, playerIndex }, i) => {
+                  if (i < shuffledPlayers.length) {
+                    newMatches[matchIndex].players[playerIndex] =
+                      shuffledPlayers[i]; // Place player in a random slot
+                  }
+                });
+
+                // Return or update state with the **new randomized matches**
+                return newMatches;
               })(),
             };
           }
@@ -370,6 +391,7 @@ export default function TournamentsPage() {
               (player) => player.playerId === id
             )
         ),
+        currentParticipants: tournament.currentParticipants + playerIds.length,
       };
       // console.log("this is updated tour ", updatedTournament);
       setTournaments((prev) =>
@@ -394,7 +416,52 @@ export default function TournamentsPage() {
     (tournament) => selectedTier === "all" || tournament.tier === selectedTier
   );
 
-  const finishTournament = (p1: Player, p2: Player) => {};
+  const getPlayersRank = (tournament: Tournament) => {
+    const ranking: string[] = []; // Stores player IDs in ranked order
+
+    // Traverse rounds from last to first to determine ranking
+    for (let i = tournament.rounds.length - 1; i >= 0; i--) {
+      const round = tournament.rounds[i];
+
+      round.matches.forEach((match) => {
+        const winner = match.winner;
+
+        if (!winner) return; // Skip if there's no winner
+
+        // Ensure winner is ranked first in the match
+        const [firstPlayer, secondPlayer] = match.players;
+
+        if (!firstPlayer || !secondPlayer) return; // Skip if players are missing
+
+        if (winner.id === firstPlayer.id) {
+          if (!ranking.includes(firstPlayer.id)) ranking.push(firstPlayer.id);
+          if (!ranking.includes(secondPlayer.id)) ranking.push(secondPlayer.id);
+        } else {
+          if (!ranking.includes(secondPlayer.id)) ranking.push(secondPlayer.id);
+          if (!ranking.includes(firstPlayer.id)) ranking.push(firstPlayer.id);
+        }
+      });
+    }
+
+    // Convert player IDs to actual player objects
+    const sortedPlayers = ranking
+      .map((playerId) =>
+        tournament.rounds[0].matches
+          .flatMap((match) => match.players)
+          .find((p) => p?.id === playerId)
+      )
+      .filter(Boolean); // Remove any undefined values
+
+    return sortedPlayers;
+  };
+
+  const finishTournament = (tournament: Tournament) => {
+    // console.log("tournament finished");
+    const players = getPlayersRank(tournament);
+    // console.log("this is tournament result ", players);
+    setResultPlayerRank(players);
+    setTournamentFinished(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -435,8 +502,16 @@ export default function TournamentsPage() {
         />
       )}
 
+      {tournamentFinished && (
+        <TournamentResult
+          matchResult={resultPlayerRank}
+          onClose={setTournamentFinished}
+        ></TournamentResult>
+      )}
+
       {selectedTournament && selectedTournament.rounds ? (
         <TournamentBracket
+          tournamentName={selectedTournament.name}
           rounds={selectedTournament.rounds}
           currentPlayerId={currentPlayer}
           registeredPLayers={selectedTournament.registeredPlayers}
@@ -444,7 +519,7 @@ export default function TournamentsPage() {
           onMatchSelect={setCurrentMatchIndex}
           onStartMatch={setCurrentPlayer}
           fillWithCPU={fillWithCpu}
-          finishTournament={finishTournament}
+          setSelectedTournament={setSelectedTournament}
         />
       ) : (
         <TournamentList

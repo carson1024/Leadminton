@@ -197,6 +197,7 @@ export const loadTournaments = async (players: Player[]): Promise<Tournament[]> 
       isQuickTournament: false,
       rounds: normalizeRound(tournament_db.rounds, tiers[tournament_db.tier]) /* tournament_db.rounds */ /* [{},{},{},{}] */,
       registeredPlayers: tournament_db.registeredPlayers,
+      name: tournament_db.name
     };
     tournaments.push(tournament);
   });

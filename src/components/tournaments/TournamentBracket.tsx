@@ -393,6 +393,7 @@ const myMatches = [
   },
 ];
 interface TournamentBracketProps {
+  tournamentName: string;
   rounds: TournamentRound[];
   currentPlayerId: string;
   registeredPLayers: RegisteredPlayer[];
@@ -400,9 +401,12 @@ interface TournamentBracketProps {
   onMatchSelect: (matchIndex: number) => void;
   fillWithCPU: () => void;
   onStartMatch: (playderId: string) => void;
-  finishTournament: () => void;
+  setSelectedTournament: () => void;
+  // finishTournament: () => void;
 }
 export default function TournamentBracket({
+  tournamentName,
+  setSelectedTournament,
   rounds,
   currentPlayerId,
   registeredPLayers,
@@ -410,8 +414,8 @@ export default function TournamentBracket({
   onMatchSelect,
   fillWithCPU,
   onStartMatch,
-  finishTournament,
-}: TournamentBracketProps) {
+}: // finishTournament,
+TournamentBracketProps) {
   const [timeLeft, setTimeLeft] = useState(
     Math.max(0, Math.floor((startTime - Date.now()) / 1000))
   );
@@ -442,11 +446,11 @@ export default function TournamentBracket({
       let result = new Array();
       console.log(rounds);
       result = rounds.flatMap((round, index) =>
-        round.matches.map((match) => ({
+        round.matches.map((match, idx) => ({
           homeTeamName: match.players[0]?.name || "...",
           awayTeamName: match.players[1]?.name || "...",
           round: index + 1,
-          matchNumber: round.name,
+          matchNumber: round.name + index + "-" + idx,
           matchComplete: match.completed,
           matchAccepted: match.completed,
           homeTeamScore: match.winner?.id == match.players[0]?.id ? 2 : 1,
@@ -477,16 +481,17 @@ export default function TournamentBracket({
           for (const match of currentRound.matches) {
             onMatchSelect(parseInt(match.id));
             onStartMatch(match.players[0]?.id);
-            await delay(400); // Wait for 100 milliseconds
+            await delay(400); // Wait for 400 milliseconds
+            console.log("this is after delay");
             onStartMatch(currentPlayerId);
-          }
-          if (currentRound?.matches?.length == 1) {
-            finishTournament(
-              currentRound?.matches?.[currentRound?.matches?.length - 1]
-                .players[0],
-              currentRound?.matches?.[currentRound?.matches?.length - 1]
-                .players[1]
-            );
+            /* if (currentRound?.matches?.length == 1) {
+              finishTournament(
+                currentRound?.matches?.[currentRound?.matches?.length - 1]
+                  .players[0],
+                currentRound?.matches?.[currentRound?.matches?.length - 1]
+                  .players[1]
+              );
+            } */
           }
         }
       };
@@ -570,7 +575,7 @@ export default function TournamentBracket({
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <Trophy className="w-8 h-8 text-yellow-500" />
-          <h2 className="text-2xl font-bold">Tournament Bracket</h2>
+          <h2 className="text-2xl font-bold">{tournamentName}</h2>
         </div>
         {timeLeft > 0 && (
           <div className="flex items-center space-x-2 px-6 py-3 bg-blue-100 rounded-full">
@@ -580,6 +585,13 @@ export default function TournamentBracket({
             </span>
           </div>
         )}
+
+        <button
+          onClick={() => setSelectedTournament(null)}
+          className={`px-4 py-2 rounded-lg ${"bg-gray-400 !important text-white hover:bg-blue-300"}`}
+        >
+          Back
+        </button>
       </div>
 
       <div className="flex justify-between px-4 text-sm font-medium text-gray-600 mb-4">
@@ -624,7 +636,7 @@ export default function TournamentBracket({
 
         <div ref={parentDiv} className="relative flex">
           <TournamentABracket
-            height={1200}
+            height={rounds.length > 4 ? 1200 : 800}
             matchHeight={90}
             width={clientWidth}
             matches={realMatch}
