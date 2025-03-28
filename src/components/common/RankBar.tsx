@@ -1,6 +1,16 @@
 import { useState, useRef } from "react";
+import { Info } from "lucide-react";
+import { MatchHistory } from "@/types/game";
 
-const RankBar = ({ rank, name }: { rank: number; name: string }) => {
+const RankBar = ({
+  rank,
+  name,
+  best,
+}: {
+  rank: number;
+  name: string;
+  best: MatchHistory[];
+}) => {
   const [tooltip, setTooltip] = useState<{
     visible: boolean;
     x: number;
@@ -34,6 +44,15 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
     N1: [451, 451],
   };
 
+  const getRankLevel = (rank: number): string => {
+    return (
+      Object.keys(rankLevels).find((level) => {
+        const [min, max] = rankLevels[level];
+        return rank >= min && rank <= max;
+      }) || "N/A"
+    );
+  };
+
   const rankPoints = Object.keys(rankLevels);
 
   // Cumulative weight mapping for red line positioning
@@ -60,7 +79,7 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
       let nextLevelPoints = 0;
       for (const [level, range] of Object.entries(rankLevels)) {
         if (rank >= range[0] && rank <= range[1]) {
-          nextLevelPoints = range[1] - rank;
+          nextLevelPoints = range[1];
           break;
         }
       }
@@ -69,7 +88,7 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
         visible: true,
         x: relativeX,
         y: -30,
-        content: `${nextLevelPoints} points to next level`,
+        content: `${rank} / ${nextLevelPoints}`,
       });
     }
   };
@@ -81,13 +100,13 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
   return (
     <div
       className="relative w-full bg-gray-300 rounded-md"
-      ref={barRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       style={{ height: "5px" }}
     >
       {/* ✅ Blue Progress Bar */}
       <div
+        ref={barRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className="h-full bg-blue-500 transition-all duration-500 rounded-md"
         style={{ width: `${progressWidth > 100 ? 100 : progressWidth}%` }}
       />
@@ -112,6 +131,31 @@ const RankBar = ({ rank, name }: { rank: number; name: string }) => {
       >
         {nextRankName}
       </span>
+
+      {/* ! at right top */}
+      <div className="relative group ml-auto">
+        <span
+          className="absolute text-xs text-center text-black font-semibold"
+          style={{
+            right: "-5%",
+            top: "-25px",
+            transform: "translateX(-50%)",
+          }}
+        >
+          <Info className="w-5 h-5 text-blue-500" />
+        </span>
+
+        {/* Tooltip - Positioned to the Right */}
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+          {best?.map((match, index) => (
+            <div key={index} className="mb-2">
+              {new Date(match["match_date"]).toLocaleDateString()} : Opponent
+              Rank :{" "}
+              {`${match.opponent_rank}(${getRankLevel(match.opponent_rank)})`}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Tooltip */}
       {tooltip.visible && (

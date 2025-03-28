@@ -12,15 +12,12 @@ export interface Injury {
   createdAt: number;
 }
 
-<<<<<<< HEAD
 export interface PlayHistory {
   result: boolean;
   level1: number;
   level2: number;
 }
 
-=======
->>>>>>> a3ea31750ecc8a976cbd0e7d918482a143f70c3d
 export interface PlayerStrategy {
   physicalCommitment: number;  // Implication physique
   playStyle: number;           // Style de frappe
@@ -36,6 +33,12 @@ export interface PlayerStrategy {
   selfConfidence: number;      // Confiance en soi
 }
 
+export interface MatchHistory {
+  opponent_id: number;
+  opponent_rank: number;
+  match_data: Date;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -45,6 +48,7 @@ export interface Player {
   level: number;
   maxLevel: number;
   rank: number;
+  best: MatchHistory[];
   equipment: PlayerEquipment;
   training?: {
     stat: keyof PlayerStats;

@@ -34,6 +34,7 @@ export const loadGameState = async (): Promise<GameState> => {
   const { data: player_strategies } = await supabase.from("player_strategy").select("*");
   const { data: facilities_db } = await supabase.from("facilities").select("*").order('created_at', { ascending: true });
   const { data: managers_db } = await supabase.from("managers").select("*").order('created_at', { ascending: true });
+  const { data: play_history_db } = await supabase.from('player_play_history').select("*");
 
   state.facilities = (facilities_db || []).map((facility_db: any): Facility => ({
     id: facility_db.id,
@@ -58,6 +59,26 @@ export const loadGameState = async (): Promise<GameState> => {
     purchasing: manager_db.purchasing
   }));
 
+
+  const getBestMatches = (player_id: string) => {
+    // Filter matches where the player won
+    const wonMatches = play_history_db
+      ?.filter(play_db =>
+        (play_db.player1_id === player_id && play_db.result === true) ||
+        (play_db.player2_id === player_id && play_db.result === false)
+      )
+      .map(play_db => ({
+        opponent_id: play_db.player1_id === player_id ? play_db.player2_id : play_db.player1_id,
+        opponent_rank: play_db.player1_id === player_id ? play_db.player2_rank : play_db.player1_rank,
+        match_date: play_db.created_at
+      }))
+      .sort((a, b) => b.opponent_rank - a.opponent_rank) // Sort by highest opponent rank
+      .slice(0, 6); // Get top 6
+
+    return wonMatches;
+  };
+
+
   let players: Player[] = [];
   (players_db || []).map((player_db: any) => {
     let equipment_id_map: {
@@ -78,12 +99,12 @@ export const loadGameState = async (): Promise<GameState> => {
       level: player_db.level,
       maxLevel: player_db.max_level,
       rank: player_db.rank,
+      best: getBestMatches(player_db.id),
       training: player_db.training,
       equipment: equiment,
       injuries: (player_db.injuries || []),
       strategy: generateInitialStrategy()
     };
-
     const player_stat = (player_stats || []).find(({ player_id }) => player_id == player_db.id);
     player_stat && (player.stats = {
       endurance: player_stat.endurance,

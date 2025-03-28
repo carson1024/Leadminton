@@ -68,6 +68,20 @@ export default function PlayerCard({
     handleSpeedUp
   );
   const [time, setTime] = useState(Date.now()); // State to trigger updates
+  const rankNames = [
+    "P12",
+    "P11",
+    "P10",
+    "D9",
+    "D8",
+    "D7",
+    "R6",
+    "R5",
+    "R4",
+    "N3",
+    "N2",
+    "N1",
+  ];
 
   const getRank = (rankPoint) => {
     if (rankPoint <= 20) return 12;
@@ -275,10 +289,14 @@ export default function PlayerCard({
               </div>
               <div>
                 <h4 className="font-medium text-gray-700 mb-2 mb-5">Rank</h4>
-                <RankBar rank={player.rank} name={getRank(player.rank)} />
+                <RankBar
+                  rank={player.rank}
+                  name={getRank(player.rank)}
+                  best={player?.best}
+                />
                 <div className="flex justify-between w-full">
-                  <span>P12</span>
-                  <span>N1</span>
+                  <span>{rankNames[12 - getRank(player.rank)]}</span>
+                  <span>{rankNames[13 - getRank(player.rank)]}</span>
                 </div>
                 {Object.keys(playerScore.details.equipmentBonuses).length >
                   0 && (

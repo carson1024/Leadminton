@@ -504,6 +504,7 @@ export default function TournamentsPage() {
 
       {tournamentFinished && (
         <TournamentResult
+          tournament={selectedTournament}
           matchResult={resultPlayerRank}
           onClose={setTournamentFinished}
         ></TournamentResult>
