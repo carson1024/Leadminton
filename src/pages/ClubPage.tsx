@@ -202,6 +202,7 @@ export default function ClubPage() {
           <PlayerCard
             key={player.id}
             player={player}
+            players={gameState.players}
             onStartTraining={handleStartTraining}
             calculateTrainingCost={calculateTrainingCost}
             canAffordTraining={(cost) =>

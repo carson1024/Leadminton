@@ -17,6 +17,7 @@ import RankBar from "../common/RankBar";
 
 interface PlayerCardProps {
   player: Player;
+  players: Player[];
   onStartTraining: (playerId: string, stat: keyof Player["stats"]) => void;
   calculateTrainingCost: (
     player: Player,
@@ -38,6 +39,7 @@ interface PlayerCardProps {
 
 export default function PlayerCard({
   player,
+  players,
   onStartTraining,
   calculateTrainingCost,
   canAffordTraining,
@@ -291,6 +293,7 @@ export default function PlayerCard({
                 <h4 className="font-medium text-gray-700 mb-2 mb-5">Rank</h4>
                 <RankBar
                   rank={player.rank}
+                  players={players}
                   name={getRank(player.rank)}
                   best={player?.best}
                 />

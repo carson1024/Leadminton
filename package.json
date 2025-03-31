@@ -12,6 +12,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
     "@types/express": "^5.0.0",
+    "brackets-json-db": "^1.0.2",
+    "brackets-manager": "^1.6.4",
     "core-js": "^3.41.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

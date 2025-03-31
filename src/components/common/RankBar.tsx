@@ -1,14 +1,16 @@
 import { useState, useRef } from "react";
 import { Info } from "lucide-react";
-import { MatchHistory } from "@/types/game";
+import { MatchHistory, Player } from "@/types/game";
 
 const RankBar = ({
   rank,
+  players,
   name,
   best,
 }: {
   rank: number;
   name: string;
+  players: Player[];
   best: MatchHistory[];
 }) => {
   const [tooltip, setTooltip] = useState<{
@@ -121,7 +123,7 @@ const RankBar = ({
       />
 
       {/* Next Level Name above Red Line */}
-      <span
+      {/* <span
         className="absolute text-xs text-center text-black font-semibold"
         style={{
           left: `${nextRankPosition}%`,
@@ -130,7 +132,7 @@ const RankBar = ({
         }}
       >
         {nextRankName}
-      </span>
+      </span> */}
 
       {/* ! at right top */}
       <div className="relative group ml-auto">
@@ -149,8 +151,11 @@ const RankBar = ({
         <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
           {best?.map((match, index) => (
             <div key={index} className="mb-2">
-              {new Date(match["match_date"]).toLocaleDateString()} : Opponent
-              Rank :{" "}
+              {new Date(match["match_date"]).toLocaleDateString()} :
+              {match["opponent_id"] != null
+                ? players.find((player) => player.id === match["opponent_id"])
+                    ?.name
+                : "CPU player"}{" "}
               {`${match.opponent_rank}(${getRankLevel(match.opponent_rank)})`}
             </div>
           ))}
