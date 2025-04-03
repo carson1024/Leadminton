@@ -29,6 +29,5 @@ export function calculatePlayerStrength(player: Player): number {
 
   // Level bonus (5% per level)
   const levelBonus = player.level * 5;
-
   return (physicalScore + technicalScore + equipmentBonus) * (1 + levelBonus / 100);
 }

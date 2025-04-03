@@ -57,7 +57,7 @@ export function simulateMatch(player1: Player, player2: Player) {
   // console.log(player1)
   const player1Strength = calculatePlayerStrength(player1);
   const player2Strength = calculatePlayerStrength(player2);
-
+  console.log(player1.id.includes('cpu') ? player1.id : player1.name, " ", player1.level, player1.rank, " ", player1Strength, " ", player2.id.includes('cpu') ? player2.id : player2.name, " ", player2.level, player2.rank, player2Strength);
   const totalStrength = player1Strength + player2Strength;
   const player1WinProbability = player1Strength / totalStrength;
 

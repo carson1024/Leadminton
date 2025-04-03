@@ -39,7 +39,8 @@ export default function TournamentRegistration({
 
       if (
         prev.length >=
-        tournament.maxParticipants - tournament.currentParticipants
+          tournament.maxParticipants - tournament.currentParticipants ||
+        prev.length >= 2
       ) {
         return prev;
       }

@@ -36,7 +36,7 @@ export interface PlayerStrategy {
 export interface MatchHistory {
   opponent_id: number;
   opponent_rank: number;
-  match_data: Date;
+  match_date: Date;
 }
 
 export interface Player {

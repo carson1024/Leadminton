@@ -32,6 +32,21 @@ export default function TournamentsPage() {
   const [selectedTier, setSelectedTier] = useState<TournamentTier | "all">(
     "all"
   );
+  const attributes = [
+    "endurance",
+    "strength",
+    "agility",
+    "speed",
+    "explosiveness",
+    "injuryPrevention",
+    "smash",
+    "defense",
+    "serve",
+    "stick",
+    "slice",
+    "drop",
+  ];
+
   // const [registeredPlayers, setRegisteredPlayers] = useState<string[]>();
   const [currentPlayer, setCurrentPlayer] = useState<string>();
   const [selectedTournament, setSelectedTournament] =
@@ -89,11 +104,7 @@ export default function TournamentsPage() {
 
     // console.log(player, opponent);
     const result = simulateMatch(player, opponent);
-    if (
-      gameState.players.some((pl, index) => pl.id == player?.id) ||
-      gameState.players.some((pl, index) => pl.id == opponent.id)
-    ) {
-      console.log("before saving");
+    if (gameState.players.some((pl, index) => pl.id == result.winner.id)) {
       const recordAndUpdate = async () => {
         await recordMatch(player, opponent, {
           result: result.winner.id == player.id,
@@ -106,10 +117,11 @@ export default function TournamentsPage() {
             ? player.id
             : opponent.id
         );
-        console.log("this is new rank ", newRank);
+        addToBest(result);
+        console.log(result.winner.name, newRank);
         dispatchGameState({
           type: "UPDATE_RANK",
-          payload: { playerId: player.id, rank: newRank },
+          payload: { playerId: result.winner.id, rank: newRank },
         });
       };
       recordAndUpdate();
@@ -150,7 +162,6 @@ export default function TournamentsPage() {
     } */
 
     // win last currentRound
-    console.log("currentRound.name", currentRound);
     if (currentRound == selectedTournament.rounds?.length - 1) {
       /* shuttlecocks: number;
       meals: number;
@@ -163,7 +174,6 @@ export default function TournamentsPage() {
         meals: selectedTournament.prizePool.first.meals || 0,
         shuttlecocks: selectedTournament.prizePool.first.shuttlecocks || 0,
       };
-      console.log("reward ", reward);
       updateResources("tournament_reward", reward);
     }
 
@@ -207,13 +217,50 @@ export default function TournamentsPage() {
         });
 
         if (currentRound == tournament?.rounds.length - 1) {
-          console.log("before finishing");
           finishTournament({ ...selectedTournament, rounds: updatedRounds });
         }
         return { ...t, rounds: updatedRounds };
       })
     );
   }, [currentMatchIndex]);
+
+  const addToBest = (matchResult) => {
+    let winner: Player = matchResult.winner;
+    let loser: Player = matchResult.loser;
+    if (winner.id.includes("cpu")) return;
+    let minOpponentRank =
+      winner.best.length === 0
+        ? 0
+        : Math.min(...winner.best.map((b) => b.opponent_rank));
+
+    if (minOpponentRank < loser.rank || winner.best.length < 6) {
+      // Find the index of the best[i] with the lowest opponent_rank
+      const indexToUpdate = winner.best.findIndex(
+        (b) => b.opponent_rank === minOpponentRank
+      );
+
+      // Update the opponent_rank
+      if (indexToUpdate !== -1 && winner.best.length >= 6) {
+        winner.best[indexToUpdate].opponent_rank = loser.rank;
+        winner.best[indexToUpdate].opponent_id = loser.id;
+        winner.best[indexToUpdate].match_date = Date.now();
+        dispatchGameState({
+          type: "UPDATE_BEST",
+          payload: { playerId: winner.id, best: winner.best },
+        });
+      } else {
+        winner.best.push({
+          opponent_rank: loser.rank,
+          opponent_id: loser.id.includes("cpu") ? null : loser.id,
+          match_date: Date.now(),
+        });
+        dispatchGameState({
+          type: "UPDATE_BEST",
+          payload: { playerId: winner.id, best: winner.best },
+        });
+      }
+    }
+  };
 
   useEffect(() => {
     if (tournaments.length > 0 && selectedTournament)
@@ -238,14 +285,42 @@ export default function TournamentsPage() {
     if (!selectedTournament) return;
     const tournament = tournaments.find((t) => t.id === selectedTournament.id);
     if (!tournament || !tournament.rounds) return;
-    console.log("this is fill with cpu function ");
 
     // fill blanks with cpu
     let currentCPUindex = 0;
     let currentRound = { ...tournament?.rounds?.[0] };
-    const cpuPlayers = Array(currentRound?.matches?.length * 2 || 16)
+    let cpuPlayers = Array(currentRound?.matches?.length * 2 || 16)
       .fill(null)
       .map((_, i) => createCpuPlayer(i + 1));
+    cpuPlayers = cpuPlayers.map((p1) => {
+      // Get average stat value
+      const total = attributes.reduce(
+        (sum, attr) => sum + p1?.statLevels[attr],
+        0
+      );
+      const average = total / attributes.length;
+      console.log(
+        p1.name,
+        " ",
+        average,
+        " ",
+        Math.round((average / 250) * 450)
+      );
+
+      // Scale the average from 0-450 (assuming original scale is 0-100)
+      const scaledRank = (average / 250) * 450;
+      console.log(
+        "this is calculated level",
+        Math.round((Math.round(scaledRank) / 450) * 200)
+      );
+      return {
+        ...p1,
+        rank: Math.round(scaledRank), // Assign rank (rounded)
+        level: Math.round((Math.round(scaledRank) / 450) * 200),
+      };
+    });
+    console.log("this is cpu players", cpuPlayers);
+
     let registeredPlayers = tournament.registeredPlayers;
     const newRound = {
       ...currentRound,
@@ -254,7 +329,6 @@ export default function TournamentsPage() {
           ...match,
           players: match.players?.map((player, ind) => {
             if (!player) {
-              console.log(currentCPUindex, cpuPlayers[currentCPUindex]);
               registeredPlayers?.push({
                 clubId: `cpu-club-${currentCPUindex}`,
                 clubName: "cpu-club",
@@ -269,7 +343,6 @@ export default function TournamentsPage() {
       }),
     };
 
-    console.log("this is updated round before update ", newRound);
     let updatedTournament: Tournament = {
       ...tournament,
       rounds: tournament?.rounds?.map((round, index) => {
@@ -279,7 +352,6 @@ export default function TournamentsPage() {
       registeredPlayers: registeredPlayers,
       currentParticipants: tournament.currentParticipants + currentCPUindex - 1,
     };
-    console.log("this is updated Tournament ", updatedTournament);
     setTournaments((prev) =>
       prev.map((t) => (t.id === selectedTournament.id ? updatedTournament : t))
     );

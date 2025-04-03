@@ -35,7 +35,6 @@ export async function recordTrainingStart(
       }
     })
     .eq('id', player.id);
-  console.log('Training started:', { player: player.name, stat, costs });
 }
 
 export async function recordTrainingComplete(
@@ -64,7 +63,6 @@ export async function recordTrainingComplete(
     }])
     .eq('player_id', player.id);
   // Local implementation - no database needed
-  console.log('Training completed:', { player: player.name, stat, newValue });
 }
 
 export async function recordPlayerStrategyChange(playerId: string, strategy: PlayerStrategy) {
@@ -128,7 +126,6 @@ export async function recordFacilityUpgradeStart(
       }
     }])
     .eq('id', facility.id);
-  console.log('Facility upgrade started:', { facility: facility.name, costs });
 }
 
 export async function recordFacilityUpgradeComplete(facility: Facility, upgradedFacility: Partial<Facility>) {
@@ -143,7 +140,6 @@ export async function recordFacilityUpgradeComplete(facility: Facility, upgraded
     }])
     .eq('id', facility.id);
   // Local implementation - no database needed
-  console.log('Facility upgrade completed:', facility.name);
 }
 
 export async function recordEquipmentChange(
@@ -165,12 +161,7 @@ export async function recordEquipmentChange(
     }])
     .eq('id', player.id);
   // Local implementation - no database needed
-  console.log('Equipment change:', {
-    player: player.name,
-    equipment: equipment.name,
-    action,
-    costs
-  });
+
 }
 
 export async function recordInjuriesChange(
@@ -181,7 +172,6 @@ export async function recordInjuriesChange(
   const now = Date.now();
   // Appliquer la réduction à toutes les blessures actives
   const updatedInjuries = injuries.filter(injury => injury.recoveryEndTime > now);
-  console.log(injuries);
   await supabase
     .from('players')
     .update([{

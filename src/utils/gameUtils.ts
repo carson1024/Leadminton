@@ -156,16 +156,15 @@ export const loadGameState = async (): Promise<GameState> => {
     players.push(player);
   });
 
+  console.log("this is players ", players);
   state.players = players;
   return state;
 };
 
 export const loadTournaments = async (players: Player[]): Promise<Tournament[]> => {
-  console.log("loading tournaments ");
   let tournaments: Tournament[] = [];
   // const { data: tournaments_db } = await supabase.from("tournament_list").select("*").order('start_date', { ascending: true });
   const { data: tournaments_db } = await supabase.rpc("get_tournaments_with_rounds_matches");
-  console.log("this is getting tournament function from db", tournaments_db);
   // console.log("this is loaded tournaments from database ", tournaments_db);
 
   const normalizeRound = (rounds, tier) => {
@@ -222,7 +221,6 @@ export const loadTournaments = async (players: Player[]): Promise<Tournament[]> 
     };
     tournaments.push(tournament);
   });
-  console.log("this is calculated", tournaments)
   return tournaments;
 };
 

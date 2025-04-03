@@ -100,7 +100,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) return;
-    console.log("User Loaded");
 
     const loadResource = async () => {
       const newResources = await loadResources(user.id);

@@ -444,7 +444,6 @@ TournamentBracketProps) {
     if (rounds) {
       // setRealMatch(new Array(Math.pow(2, rounds.length) - 1));
       let result = new Array();
-      console.log(rounds);
       result = rounds.flatMap((round, index) =>
         round.matches.map((match, idx) => ({
           homeTeamName: match.players[0]?.name || "...",
@@ -458,7 +457,6 @@ TournamentBracketProps) {
         }))
       );
 
-      console.log(result);
       setRealMatch(result);
     }
   }, [rounds]);
@@ -482,7 +480,6 @@ TournamentBracketProps) {
             onMatchSelect(parseInt(match.id));
             onStartMatch(match.players[0]?.id);
             await delay(400); // Wait for 400 milliseconds
-            console.log("this is after delay");
             onStartMatch(currentPlayerId);
             /* if (currentRound?.matches?.length == 1) {
               finishTournament(

@@ -11,7 +11,8 @@ type PlayerAction =
   | { type: 'UPDATE_PLAYER_NAME'; payload: { playerId: string; name: string } }
   | { type: 'ADD_INJURY'; payload: { playerId: string; injury: any } }
   | { type: 'UPDATE_RANK'; payload: { playerId: string; rank: number } }
-  | { type: 'HEAL_INJURY'; payload: { playerId: string; injuryId: string } };
+  | { type: 'HEAL_INJURY'; payload: { playerId: string; injuryId: string } }
+  | { type: 'UPDATE_BEST'; payload: { playerId: string; best } };
 
 export function playerReducer(players: Player[], action: PlayerAction): Player[] {
   switch (action.type) {
@@ -84,6 +85,9 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
 
     case 'UPDATE_RANK':
       return players.map(player => player.id === action.payload.playerId ? { ...player, rank: action.payload.rank } : player)
+
+    case 'UPDATE_BEST':
+      return players.map(player => player.id === action.payload.playerId ? { ...player, best: action.payload.best } : player)
 
     case 'ADD_INJURY':
       return players.map(player =>
