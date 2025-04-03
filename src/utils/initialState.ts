@@ -154,7 +154,7 @@ export function generateNewPlayer(): Player {
     stats: generateInitialStats(),
     statLevels: generateInitialStatLevels(),
     strategy: generateInitialStrategy(),
-    rank: 12,
+    rank: 0,
     level: 1,
     training: undefined,
     maxLevel: Math.floor(Math.random() * 50) + 150,
