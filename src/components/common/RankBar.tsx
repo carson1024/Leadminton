@@ -90,7 +90,9 @@ const RankBar = ({
         visible: true,
         x: relativeX,
         y: -30,
-        content: `${rank} / ${nextLevelPoints}`,
+        content: `${parseFloat(rank).toFixed(2)} / ${parseFloat(
+          nextLevelPoints
+        ).toFixed(2)}`,
       });
     }
   };

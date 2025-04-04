@@ -299,27 +299,16 @@ export default function TournamentsPage() {
         0
       );
       const average = total / attributes.length;
-      console.log(
-        p1.name,
-        " ",
-        average,
-        " ",
-        Math.round((average / 250) * 450)
-      );
 
       // Scale the average from 0-450 (assuming original scale is 0-100)
       const scaledRank = (average / 250) * 450;
-      console.log(
-        "this is calculated level",
-        Math.round((Math.round(scaledRank) / 450) * 200)
-      );
+
       return {
         ...p1,
         rank: Math.round(scaledRank), // Assign rank (rounded)
         level: Math.round((Math.round(scaledRank) / 450) * 200),
       };
     });
-    console.log("this is cpu players", cpuPlayers);
 
     let registeredPlayers = tournament.registeredPlayers;
     const newRound = {
