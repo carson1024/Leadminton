@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Pencil, Dumbbell, Brain, Shirt, Heart, Settings } from "lucide-react";
+import {
+  Pencil,
+  Dumbbell,
+  Brain,
+  Shirt,
+  Heart,
+  Settings,
+  Trash,
+} from "lucide-react";
 import { Player, PlayerStrategy } from "../../types/game";
 import { Equipment } from "../../types/equipment";
 import { Resources } from "../../types/game";
@@ -14,6 +22,7 @@ import { calculateTotalInjuryEffect } from "../../utils/injuryUtils";
 import PlayerStrategyModal from "./PlayerStrategyModal";
 import { formatTime } from "@/utils/dateFormatter";
 import RankBar from "../common/RankBar";
+import PlayerDeleteModal from "./PlayerDeleteModal";
 
 interface PlayerCardProps {
   player: Player;
@@ -59,6 +68,7 @@ export default function PlayerCard({
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(player.name);
   const [showStrategy, setShowStrategy] = useState(false);
+  const [deletePlayer, setDeletePlayer] = useState(false);
   const handleSpeedUp = useCallback(() => {
     if (player.training) {
       onSpeedUpTraining(player.id);
@@ -248,6 +258,13 @@ export default function PlayerCard({
               title="Stratégie"
             >
               <Settings className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setDeletePlayer(true)}
+              className="p-2 rounded-lg bg-indigo-500 text-white hover:bg-indigo-600"
+              title="delete"
+            >
+              <Trash className="w-4 h-4"></Trash>
             </button>
           </div>
         </div>
@@ -450,6 +467,13 @@ export default function PlayerCard({
           player={player}
           onClose={() => setShowStrategy(false)}
           onUpdateStrategy={onUpdateStrategy}
+        />
+      )}
+
+      {deletePlayer && (
+        <PlayerDeleteModal
+          player={player}
+          onClose={() => setDeletePlayer(false)}
         />
       )}
     </>

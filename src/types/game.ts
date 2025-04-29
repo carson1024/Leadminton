@@ -85,6 +85,7 @@ export interface GameState {
   players: Player[];
   facilities: Facility[];
   managers: Manager[];
+  seasons: Season[];
 }
 
 export interface Facility {
@@ -119,4 +120,23 @@ export interface Manager {
     startTime: number;
     period: number;
   };
+}
+
+export interface Season {
+  id: string;
+  entryFee: {
+    player: number;
+    coins: number;
+    shuttlecocks: number;
+    meals: number;
+    diamonds: number;
+  },
+  prizePool: {
+    [key: string]: {
+      coins: number;
+      diamonds: number;
+    }
+  },
+  match_days: Array<Date>;
+  type: number;
 }

@@ -4,6 +4,7 @@ import { Equipment } from '@/types/equipment';
 
 type PlayerAction =
   | { type: 'ADD_PLAYER'; payload: { player: Player } }
+  | { type: 'REMOVE_PLAYER'; payload: { player: Player } }
   | { type: 'START_TRAINING'; payload: { playerId: string; stat: keyof Player['stats'] } }
   | { type: 'COMPLETE_TRAINING'; payload: { playerId: string } }
   | { type: 'EQUIP_ITEM'; payload: { playerId: string; equipment: Equipment } }
@@ -20,7 +21,9 @@ export function playerReducer(players: Player[], action: PlayerAction): Player[]
       return [
         ...players,
         action.payload.player
-      ]
+      ];
+    case 'REMOVE_PLAYER':
+      return players.filter(player => player.id !== action.payload.player.id);
     case 'START_TRAINING':
       return players.map(player =>
         player.id === action.payload.playerId

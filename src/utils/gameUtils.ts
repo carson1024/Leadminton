@@ -3,7 +3,7 @@ import { Facility, GameState, Manager, Player, Resources } from "@/types/game";
 import { generateInitialStatLevels, generateInitialStats, generateInitialStrategy, generateNewPlayer, initialFacilities, initialManagers, initialState } from "./initialState";
 import { EQUIPMENT_DATA } from "@/data/equipment";
 import { Equipment } from "@/types/equipment";
-import { Tournament, TournamentRound, Match } from "@/types/tournament";
+import { Tournament, Match } from "@/types/tournament";
 
 export const loadResources = async (userId: string): Promise<Resources | null> => {
   const resources: Resources = {
@@ -22,10 +22,11 @@ export const loadResources = async (userId: string): Promise<Resources | null> =
 }
 
 export const loadGameState = async (): Promise<GameState> => {
-  let state: GameState = {
+  const state: GameState = {
     players: [],
     facilities: [],
-    managers: initialManagers
+    managers: initialManagers,
+    seasons: [],
   };
 
   const { data: players_db } = await supabase.from("players").select("*").order('created_at', { ascending: true });
@@ -35,6 +36,7 @@ export const loadGameState = async (): Promise<GameState> => {
   const { data: facilities_db } = await supabase.from("facilities").select("*").order('created_at', { ascending: true });
   const { data: managers_db } = await supabase.from("managers").select("*").order('created_at', { ascending: true });
   const { data: play_history_db } = await supabase.from('player_play_history').select("*");
+  const { data: season_list_db } = await supabase.from('season_list').select("*");
 
   state.facilities = (facilities_db || []).map((facility_db: any): Facility => ({
     id: facility_db.id,
@@ -59,6 +61,20 @@ export const loadGameState = async (): Promise<GameState> => {
     purchasing: manager_db.purchasing
   }));
 
+  state.seasons = (season_list_db || []).map((season_db: any) => ({
+    id: season_db.id,
+    entryFee: {
+      coins: season_db.entryFee.coins,
+      shuttlecocks: season_db.entryFee.shuttlecocks,
+      meals: season_db.entryFee.meals,
+      diamonds: season_db.entryFee.diamonds,
+      player: season_db.entryFee.player,
+    },
+    startDate: season_db.start_date,
+    prizePool: season_db.prizePool,
+    match_days: season_db.match_days,
+    type: season_db.type,
+  }));
 
   const getBestMatches = (player_id: string) => {
     // Filter matches where the player won
@@ -79,18 +95,18 @@ export const loadGameState = async (): Promise<GameState> => {
   };
 
 
-  let players: Player[] = [];
+  const players: Player[] = [];
   (players_db || []).map((player_db: any) => {
-    let equipment_id_map: {
+    const equipment_id_map: {
       [key: string]: string
     } = player_db.equipment;
-    let equiment: {
+    const equiment: {
       [key: string]: Equipment
     } = {};
     equipment_id_map && Object.entries(equipment_id_map).map(([type, id]) => {
       equiment[type] = EQUIPMENT_DATA.find((equiment) => equiment.id == id) as Equipment;
     });
-    let player: Player = {
+    const player: Player = {
       id: player_db.id,
       gender: player_db.gender,
       name: player_db.name,

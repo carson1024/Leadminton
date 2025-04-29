@@ -27,52 +27,8 @@ export default function InterclubPage() {
   const [selectedPlayerIdWD2, setSelectedPlayerIdWD2] = useState("");
   const [selectedPlayerIdMiD1, setSelectedPlayerIdMiD1] = useState("");
   const [selectedPlayerIdMiD2, setSelectedPlayerIdMiD2] = useState("");
-  const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
 
-  setInterval(() => {
-    setCurrentTime(new Date(Date.now()));
-  }, 1000);
-  const nameArray1 = ["Départemental", "Régional", "National", "TOP 12"];
-  const nameArray2 = [
-    "Niveau débutant",
-    "Niveau intermédiaire",
-    "Niveau avancé",
-    "Élite",
-  ];
 
-  const [currentSeason, setCurrentSeason] = useState(0);
-  const [nextMatchDate, setNextMatchDate] = useState<Date>(
-    new Date("2025/07/02")
-  );
-  const onSelectSeason = (index: number) => {
-    setCurrentSeason(index);
-    const now = new Date();
-    if (gameState.seasons && gameState.seasons?.length > 0) {
-      setNextMatchDate(
-        gameState.seasons[index].match_days.find((matchDay) => {
-          return new Date(matchDay) > now;
-        }) || now
-      );
-    }
-  };
-
-  function formatTime(seconds: number): string {
-    const days = Math.floor(seconds / 86400); // 86400 seconds in a day
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-
-    return (
-      (days > 0 ? `${days}d ` : "") +
-      `${hours}:${String(minutes).padStart(2, "0")}:${String(
-        remainingSeconds
-      ).padStart(2, "0")}`
-    );
-  }
-
-  useEffect(() => {
-    console.log("nextMatchDate", nextMatchDate);
-  }, [nextMatchDate]);
 
   // Page d'introduction des interclubs  Interclub introductory page
   if (showIntro == 1) {
@@ -105,41 +61,19 @@ export default function InterclubPage() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3 text-gray-700">
                   <Users className="w-5 h-5 text-blue-500" />
-                  <span>
-                    {/* {console.log("this is seasons ", gameState.seasons)} */}
-                    {gameState?.seasons
-                      ? gameState?.seasons[currentSeason]?.entryFee?.player
-                      : "0"}{" "}
-                    joueurs minimum
-                  </span>
+                  <span>5 joueurs minimum</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-700">
                   <Coins className="w-5 h-5 text-yellow-500" />
-                  <span>
-                    {gameState?.seasons
-                      ? gameState?.seasons[currentSeason]?.entryFee?.coins
-                      : "0"}{" "}
-                    pièces
-                  </span>
+                  <span>1000 pièces</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-700">
                   <Feather className="w-5 h-5 text-blue-500" />
-                  <span>
-                    {gameState?.seasons
-                      ? gameState?.seasons[currentSeason]?.entryFee
-                          ?.shuttlecocks
-                      : "0"}{" "}
-                    volants
-                  </span>
+                  <span>100 volants</span>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-700">
                   <UtensilsCrossed className="w-5 h-5 text-green-500" />
-                  <span>
-                    {gameState?.seasons
-                      ? gameState?.seasons[currentSeason]?.entryFee?.meals
-                      : "0"}{" "}
-                    nourriture
-                  </span>
+                  <span>50 nourriture</span>
                 </div>
               </div>
             </div>
@@ -192,24 +126,31 @@ export default function InterclubPage() {
               Sélectionnez votre catégorie
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {gameState.seasons?.map((season, index) => {
-                console.log("this is season, ", season);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => onSelectSeason(index)}
-                    className="p-4 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
-                  >
-                    <div className="text-lg font-medium">
-                      {" "}
-                      {nameArray1[season.type]}
-                    </div>
-                    <div className="text-sm opacity-75">
-                      {nameArray2[season.type]}
-                    </div>
-                  </button>
-                );
-              })}
+              <button className="p-4 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors">
+                <div className="text-lg font-medium">Départemental</div>
+                <div className="text-sm opacity-75">Niveau débutant</div>
+              </button>
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
+                <div className="text-lg font-medium">Régional</div>
+                <div className="text-sm">Niveau intermédiaire</div>
+              </button>
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
+                <div className="text-lg font-medium">National</div>
+                <div className="text-sm">Niveau avancé</div>
+              </button>
+              <button
+                disabled
+                className="p-4 bg-gray-100 text-gray-400 rounded-xl cursor-not-allowed"
+              >
+                <div className="text-lg font-medium">TOP 12</div>
+                <div className="text-sm">Élite</div>
+              </button>
             </div>
             <p className="text-sm text-gray-500 text-center mt-4">
               <Info className="w-4 h-4 inline-block mr-1" />
@@ -304,15 +245,7 @@ export default function InterclubPage() {
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-lg font-semibold mb-4 flex justify-between items-center space-x-2">
               <Swords className="w-5 h-5 text-purple-500" />
-              <span>{`Prochaine Rencontre(${
-                "starts in " +
-                formatTime(
-                  Math.floor(
-                    nextMatchDate.getTime() / 1000 -
-                      currentTime?.getTime() / 1000
-                  )
-                )
-              })`}</span>
+              <span>{`Prochaine Rencontre(${"starts in 1:2:3"})`}</span>
               <span>MD1</span>
             </h2>
             <div className="text-center py-8">

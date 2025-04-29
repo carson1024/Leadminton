@@ -15,6 +15,7 @@ export function calculatePlayerStrength(player: Player): number {
     .filter(([stat]) => ['smash', 'defense', 'serve', 'stick', 'slice', 'drop'].includes(stat))
     .reduce((sum, [_, value]) => sum + value, 0);
 
+
   // Equipment bonuses
   let equipmentBonus = 0;
   if (player.equipment) {
