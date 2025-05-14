@@ -29,6 +29,8 @@ export default function InterclubPage() {
   const [selectedPlayerIdMiD2, setSelectedPlayerIdMiD2] = useState("");
   const [currentTime, setCurrentTime] = useState<Date>(new Date(Date.now()));
 
+  const [lineUpState, setLineUpState] = useState(false);
+
   setInterval(() => {
     setCurrentTime(new Date(Date.now()));
   }, 1000);
@@ -87,12 +89,12 @@ export default function InterclubPage() {
           <div className="text-center mb-8">
             {/* New Interclub Season */}
             <h2 className="text-2xl font-bold text-blue-600 mb-4">
-              Nouvelle Saison d'Interclub
+              Sélectionnez la saison
             </h2>
             {/* You are about to launch a one-month interclub season. */}
             <p className="text-lg text-gray-600">
-              Vous êtes sur le point de lancer une saison d'interclub d'une
-              durée de 1 mois
+              Vous êtes sur le point de vous lancer dans une saison interclubs
+              d'un mois
             </p>
           </div>
 
@@ -428,182 +430,224 @@ export default function InterclubPage() {
   }
 
   if (showIntro == 3) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <Trophy className="w-8 h-8 text-blue-500" />
-          <span className="text-2xl font-bold">Lineup</span>
-          <span className="!ml-16 ml-4 text-xl font-bold">{`${"(MD1)"}`}</span>
-          <span className="!ml-16 text-xl font-bold whitespace-nowrap flex-shrink-0">{`${"12h 2m 3s "}`}</span>
+    if (!lineUpState) {
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center space-x-3 mb-8">
+            <Trophy className="w-8 h-8 text-blue-500" />
+            <span className="text-2xl font-bold">Lineup</span>
+            <span className="!ml-16 ml-4 text-xl font-bold">{`${"(MD1)"}`}</span>
+            <span className="!ml-16 text-xl font-bold whitespace-nowrap flex-shrink-0">{`${"12h 2m 3s "}`}</span>
+
+            <div className="flex w-full justify-end">
+              <button
+                onClick={() => {
+                  setShowIntro(2);
+                }}
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Back
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Liste des joueurs */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="font-bold mb-4">Men’s Singles</h3>
+              <select
+                value={selectedPlayerIdMS}
+                onChange={(e) => setSelectedPlayerIdMS(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "male")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="font-bold mb-4">Women’s Singles</h3>
+              <select
+                value={selectedPlayerIdWS}
+                onChange={(e) => setSelectedPlayerIdWS(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "female")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="font-bold mb-4">Men's Doubles</h3>
+              <select
+                value={selectedPlayerIdMD1}
+                onChange={(e) => {
+                  if (selectedPlayerIdMD2 != e.target.value)
+                    setSelectedPlayerIdMD1(e.target.value);
+                }}
+                className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "male")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+              <select
+                value={selectedPlayerIdMD2}
+                onChange={(e) => {
+                  if (selectedPlayerIdMD1 != e.target.value)
+                    setSelectedPlayerIdMD2(e.target.value);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "male")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="font-bold mb-4">Women’s Doubles</h3>
+              <select
+                value={selectedPlayerIdWD1}
+                onChange={(e) => setSelectedPlayerIdWD1(e.target.value)}
+                className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "female")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+              <select
+                value={selectedPlayerIdWD2}
+                onChange={(e) => setSelectedPlayerIdWD2(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players
+                  .filter((player: Player) => player.gender === "female")
+                  .map((player: Player) => (
+                    <option key={player.id} value={player.id}>
+                      {player.name} — Level {player.level}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="font-bold mb-4">Mixed Doubles</h3>
+              <select
+                value={selectedPlayerIdMiD1}
+                onChange={(e) => {
+                  if (selectedPlayerIdMiD2) {
+                    if (
+                      gameState.players.find((player) => {
+                        return player.id == selectedPlayerIdMiD2;
+                      })?.gender !=
+                      gameState.players.find((player) => {
+                        return player.id == e.target.value;
+                      })?.gender
+                    )
+                      setSelectedPlayerIdMiD1(e.target.value);
+                  } else setSelectedPlayerIdMiD1(e.target.value);
+                }}
+                className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players.map((player: Player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.name} — Level {player.level}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedPlayerIdMiD2}
+                onChange={(e) => {
+                  if (selectedPlayerIdMiD1) {
+                    if (
+                      gameState.players.find((player) => {
+                        return player.id == selectedPlayerIdMiD1;
+                      })?.gender !=
+                      gameState.players.find((player) => {
+                        return player.id == e.target.value;
+                      })?.gender
+                    )
+                      setSelectedPlayerIdMiD2(e.target.value);
+                  } else setSelectedPlayerIdMiD2(e.target.value);
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Select a player
+                </option>
+                {gameState.players.map((player: Player) => (
+                  <option key={player.id} value={player.id}>
+                    {player.name} — Level {player.level}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="flex w-full justify-end">
             <button
               onClick={() => {
-                setShowIntro(2);
+                setLineUpState(true);
               }}
-              className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
             >
-              Back
+              Submit Lineup
             </button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Liste des joueurs */}
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold mb-4">Men’s Singles</h3>
-            <select
-              value={selectedPlayerIdMS}
-              onChange={(e) => setSelectedPlayerIdMS(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players
-                .filter((player: Player) => player.gender === "male")
-                .map((player: Player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} — Level {player.level}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold mb-4">Women’s Singles</h3>
-            <select
-              value={selectedPlayerIdWS}
-              onChange={(e) => setSelectedPlayerIdWS(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players
-                .filter((player: Player) => player.gender === "female")
-                .map((player: Player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} — Level {player.level}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold mb-4">Men's Doubles</h3>
-            <select
-              value={selectedPlayerIdMD1}
-              onChange={(e) => setSelectedPlayerIdMD1(e.target.value)}
-              className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players
-                .filter((player: Player) => player.gender === "male")
-                .map((player: Player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} — Level {player.level}
-                  </option>
-                ))}
-            </select>
-            <select
-              value={selectedPlayerIdMD2}
-              onChange={(e) => setSelectedPlayerIdMD2(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players.map((player: Player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name} — Level {player.level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold mb-4">Women’s Doubles</h3>
-            <select
-              value={selectedPlayerIdWD1}
-              onChange={(e) => setSelectedPlayerIdWD1(e.target.value)}
-              className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players
-                .filter((player: Player) => player.gender === "female")
-                .map((player: Player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} — Level {player.level}
-                  </option>
-                ))}
-            </select>
-            <select
-              value={selectedPlayerIdWD2}
-              onChange={(e) => setSelectedPlayerIdWD2(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players
-                .filter((player: Player) => player.gender === "female")
-                .map((player: Player) => (
-                  <option key={player.id} value={player.id}>
-                    {player.name} — Level {player.level}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h3 className="font-bold mb-4">Mixed Doubles</h3>
-            <select
-              value={selectedPlayerIdMiD1}
-              onChange={(e) => setSelectedPlayerIdMiD1(e.target.value)}
-              className=" mb-4 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players.map((player: Player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name} — Level {player.level}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedPlayerIdMiD2}
-              onChange={(e) => setSelectedPlayerIdMiD2(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>
-                Select a player
-              </option>
-              {gameState.players.map((player: Player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name} — Level {player.level}
-                </option>
-              ))}
-            </select>
-          </div>
+      );
+    } else {
+      return (
+        <div>
+          <h1 className="w-full text-center font-bold text-[40px]">
+            Your Lineup is waiting for review
+          </h1>
         </div>
-
-        <div className="flex w-full justify-end">
-          <button
-            onClick={() => {
-              alert("Lineup submited.");
-            }}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-          >
-            Submit Lineup
-          </button>
-        </div>
-      </div>
-    );
+      );
+    }
   }
 }

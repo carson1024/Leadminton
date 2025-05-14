@@ -69,7 +69,7 @@ export default function TournamentRegistration({
           </p>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="space-y-3 mb-4">
+            <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
               {eligiblePlayers.map((player) => (
                 <label
                   key={player.id}
